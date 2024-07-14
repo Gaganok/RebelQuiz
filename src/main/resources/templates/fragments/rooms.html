@@ -1,0 +1,6 @@
+<div th:fragment="rooms">
+    <li class="collection-header"><h5>Available Rooms</h5></li>
+    <a th:each="room : ${rooms}" href="#!" class="collection-item" th:text="${room.name}"
+        onclick="selectRoom()"  
+    ></a>
+</div>

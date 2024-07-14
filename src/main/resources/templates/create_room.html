@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://unpkg.com/htmx.org/dist/htmx.min.js"></script>
+
+    <title>Rebel Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .input-wrapper {
+            display: flex;
+            flex-direction: column;
+            max-width: 30vh;
+            margin: 30vh auto;
+        }
+
+        .input-field label {
+            color: #9e9e9e !important;
+        }
+
+        .input-field input[type=text]:focus + label {
+            color: #0d47a1 !important;
+        }
+
+        .input-field input[type=text].valid {
+            border-bottom: 1px solid #9e9e9e !important;
+            box-shadow: 0 0 0 0 #bbdefb !important;
+        }
+
+        .input-field input[type="text"]:focus {
+            color: #424242 !important;
+            border-bottom: 2px solid #0d47a1 !important;
+            box-shadow: 0 1px 0 0 #bbdefb !important;
+        }
+
+        .btn-custom {
+            background-color: #0d47a1 !important; /* Change background color */
+            color: #ffffff !important; /* Change text color */
+            border: none; /* Remove border */
+        }
+
+    </style>
+</head>
+<body>
+    <div id="view">
+
+        <style scoped>
+            .select-wrapper{
+                padding: 15px 0px;
+            }
+
+            .select-wrapper li:first-of-type span{
+                color: #9e9e9e !important;
+            }
+    
+            .select-wrapper li span {
+                color: #0d47a1 !important;
+            }  
+
+            select{
+                display: block;
+            }
+        </style>
+    
+        <h1 style="margin-left: 25px; color: #9e9e9e">Create your room</h1>
+        <form id="create-room-form" name="create-room-form"
+            hx-post="/room/create" 
+            hx-target="#view"
+            hx-vals='js:{selectedPack: getSelectedPack()}'
+            hx-trigger="click from:#create-room-button"
+            hx-swap="outerHTML"
+        >
+            <div class="input-wrapper">
+                <div class="input-field col s6">
+                    <input id="name" name="name" type="text" class="validate">
+                    <label class="center-align" for="name">Name</label>
+                </div>
+                <div class="select-wrapper">
+                    <label>Quiz</label>
+                    <select id="pack-select" class="quiz-select">
+                      <option disabled selected>Choose quiz</option>
+                      <option 
+                        th:each="packName : ${packNames}" 
+                        th:value="${packName}"
+                        th:text="${packName}"></option>
+                    </select>
+                </div>
+                <a id="create-room-button" class="waves-effect waves-light btn btn-custom">Create</a>
+            </div>
+        </form>
+        <script>
+    
+            // var instances = M.FormSelect.init(document.getElementById("pack-select"));
+    
+            function getSelectedPack() {
+                return document.getElementById('pack-select').value;
+            }
+            
+        </script>
+    </div>
+</body>
+</html>

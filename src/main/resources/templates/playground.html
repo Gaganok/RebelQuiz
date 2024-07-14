@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://unpkg.com/htmx.org/dist/htmx.min.js"></script>
+
+    <title>Document</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }   
+
+    </style>
+</head>
+<body>
+
+    <div id="view">
+        <style scoped>
+            .playground-wrapper {
+                display: flex;
+                flex-direction: column;
+                max-width: 50vh;
+                margin: 20vh auto;
+                text-align: center;
+            }
+    
+            .collection-item {
+                color: #0d47a1 !important;
+            }
+    
+            .collection-item:not(.active):hover {
+                background-color: #bbdefb !important;
+                font-size: 15px;
+                transition: font-size 0.1s ease;
+            }
+    
+            .collection-header {
+                color: #424242 !important;
+            }
+    
+            .collection {
+                border-radius: 10px !important;
+            }
+
+            .btn-custom {
+                background-color: #0d47a1 !important;
+                color: #ffffff !important;
+                border: none;
+                min-width: 150px;
+            }
+            
+            .button-wrapper {
+                display: flex;
+                justify-content: space-between;
+            }
+        </style>
+    
+        <h2 style="margin-left: 25px; color: #9e9e9e">Playground</h2>
+        <div class="playground-wrapper">
+            <ul class="collection with-header" th:insert="fragments/rooms :: rooms"></ul>
+            <div class="button-wrapper">
+                <a class="waves-effect waves-light btn btn-custom" 
+                    hx-get="/room/create" 
+                    hx-target="#view"
+                    hx-swap="outerHTML"
+                >Create Room</a>
+                <a class="waves-effect waves-light btn btn-custom" 
+                    hx-get="/room/join" 
+                    hx-target="#view"
+                    hx-swap="outerHTML"
+                >Join</a>
+            </div>
+        </div>
+    </div>
+    
+<script type="text/javascript" src="js/materialize.min.js"></script>
+</body>
+</html>

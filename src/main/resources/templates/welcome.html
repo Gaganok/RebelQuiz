@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://unpkg.com/htmx.org/dist/htmx.min.js"></script>   
+    <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/ws.js"></script>
+
+    <title>Rebel Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .input-wrapper {
+            display: flex;
+            flex-direction: column;
+            max-width: 30vh;
+            margin: 30vh auto;
+        }
+
+        .input-field label {
+            color: #9e9e9e !important;
+        }
+
+        .input-field input[type=text]:focus + label {
+            color: #0d47a1 !important;
+        }
+
+        .input-field input[type=text].valid {
+            border-bottom: 1px solid #9e9e9e !important;
+            box-shadow: 0 0 0 0 #bbdefb !important;
+        }
+
+        .input-field input[type="text"]:focus {
+            color: #424242 !important;
+            border-bottom: 2px solid #0d47a1 !important;
+            box-shadow: 0 1px 0 0 #bbdefb !important;
+        }
+
+        .btn-custom {
+            background-color: #0d47a1 !important;
+            color: #ffffff !important;
+            border: none;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="view">
+        <h2 style="margin-left: 25px; color: #9e9e9e">Rebel Quiz</h2>
+        <div class="input-wrapper">
+            <div class="input-field col s6">
+                <input id="nickname" name="nickname" type="text" class="validate">
+                <label class="center-align" for="nickname">Nickname</label>
+            </div>
+            <a class="waves-effect waves-light btn btn-custom" 
+                hx-post="/playground" 
+                hx-target="#view"
+                hx-include="#nickname"
+                hx-swap="outerHTML"
+            >Continue</a>
+        </div>
+    </div>
+    <!-- <script type="text/javascript" src="js/materialize.min.js"></script> -->
+</body>
+</html>
