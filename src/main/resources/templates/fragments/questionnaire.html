@@ -1,0 +1,8 @@
+<div id="questionnaire" class="questionnaire">
+    <div class="category" th:each="category : ${questionnaire}">
+        <a class="waves-effect waves-teal btn-flat category-title" th:text="${category.name}"></a>
+        <div class="questionnaire-wrapper" >
+            <a th:class="'waves-effect waves-light btn-small ' + (${active} ? '' : 'disabled')" th:each="question : ${category.qa}" th:text="${question.value}"></a> 
+        </div>
+    </div>
+</div>

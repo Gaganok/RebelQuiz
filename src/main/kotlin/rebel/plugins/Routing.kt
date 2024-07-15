@@ -1,12 +1,13 @@
 package rebel.plugins
 
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
-import io.ktor.server.thymeleaf.*
 import rebel.service.*
+import rebel.utils.*
 
 fun Application.configureRouting() {
 
@@ -17,11 +18,10 @@ fun Application.configureRouting() {
 
         post("/playground") {
             val params = call.receiveParameters()
-            val nickname: String = params["nickname"]
-                ?.takeUnless { it.isBlank() }
-                ?: throw IllegalArgumentException("Nickname is missing or blank")
 
-            call.sessions.get<QuizSession>() ?: call.sessions.set(QuizSession(nickname = nickname))
+            call.sessions.get<QuizSession>()
+                ?: call.sessions.set(QuizSession(nickname = params.nicknameParam()))
+
             call.respond(playground())
         }
 
@@ -35,56 +35,47 @@ fun Application.configureRouting() {
 
         post("/room/create") {
             val params = call.receiveParameters()
-            val name: String = params["name"]
-                ?.takeUnless { it.isBlank() }
-                ?: throw IllegalArgumentException("Room name is missing or blank")
 
-            val pack: Pack = params["selectedPack"]
-                ?.let { packByName(it) }
-                ?: throw IllegalArgumentException("Pack selection is missing")
+            val roomName = params.roomNameParam()
+            val pack: Pack = params.packByParam()
+            val session = call.quizSession()
 
-            val host = call.sessions.get<QuizSession>()?.nickname
-                ?: throw IllegalArgumentException("Session info is missing");
+            val room = newRoom(roomName, session.nickname, pack);
 
-            val room = newRoom(name, host, pack);
+            session.room = room.name
+            call.sessions.set(session)
 
-            call.respond(room(RoomTemplateData(room, true)))
+            call.respond(room(room, room.host.id, ParticipantStatus.HOST))
         }
 
         post("/room/join") {
             val params = call.receiveParameters()
-            val roomName: String = params["selectedRoom"]
-                ?.takeUnless { it.isBlank() }
-                ?: throw IllegalArgumentException("Room name is missing or blank")
 
-            val participantName = call.sessions.get<QuizSession>()?.nickname
-                ?: throw IllegalArgumentException("Session info is missing");
+            val roomName = params.roomNameParam()
+            val session = call.quizSession()
 
-            val room = joinRoom(participantName, roomName)
+            val participant = Participant(name = session.nickname, points = 0)
+            val room = joinRoom(participant, roomName)
 
-            call.respond(room(RoomTemplateData(room)))
+            session.withRoom(room.name).let { call.sessions.set(it) }
+
+            call.respond(room(room, participant.id, ParticipantStatus.VIEWER))
+        }
+
+        get("/room/start") {
+            val session = call.quizSession();
+
+            val room = session.room
+                ?.let { roomByName(it) }
+                ?: throw IllegalStateException("Room is missing from session")
+
+            require(room.host.name == session.nickname) {
+                "Non-host participant is not allowed to start the room"
+            }
+
+            startQuiz(room)
+
+            call.respond(HttpStatusCode.NoContent)
         }
     }
-}
-
-data class RoomTemplateData(val room: Room, val isHost: Boolean = false)
-
-fun roomList() : ThymeleafContent {
-    return ThymeleafContent("fragments/rooms", mapOf(Pair("rooms", rooms())))
-}
-
-fun room(data: RoomTemplateData) : ThymeleafContent {
-    return ThymeleafContent("room_min", mapOf(Pair("data", data)))
-}
-
-fun createRoom() : ThymeleafContent {
-    return ThymeleafContent("create_room_min", mapOf(Pair("packNames", packNames())))
-}
-
-fun playground() : ThymeleafContent {
-    return ThymeleafContent("playground_min", mapOf(Pair("rooms", rooms())))
-}
-
-fun welcome() : ThymeleafContent {
-    return ThymeleafContent("welcome", mapOf())
 }

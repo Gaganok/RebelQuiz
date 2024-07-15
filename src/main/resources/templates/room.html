@@ -32,7 +32,7 @@
                 gap: 30px;
             }
 
-            .questioner {
+            .questionnaire {
                 display: flex;
                 justify-content: center;
                 flex-direction: column;
@@ -79,14 +79,46 @@
 
             .btn-large {
                 background-color: #0d47a1 !important;
-                color: #ffffff !important;
-                border: none;
             }
 
             .btn-large__error {
                 background-color: #e57373 !important;
-                color: #ffffff !important;
-                border: none;
+            }
+
+            .btn-small {
+                background-color: #0d47a1 !important;
+            }
+
+            .btn-small {
+                background-color: #0d47a1 !important;
+            }
+
+            .category {
+                display: flex;
+                gap: 10px;
+                justify-content: space-between;
+                padding: 0px 50px 5px 50px;
+            }
+
+            .category-title {
+                cursor: default;
+                min-width: 200px;
+                text-align: start;
+            }
+
+            .collection-item.active {
+                background-color: #0d47a1 !important;
+                color: #e1f5fe !important;
+            }
+
+            .questionnaire-wrapper {
+                display: flex;
+                flex-grow: 70;
+                gap: 5px;
+            }
+
+            .questionnaire-wrapper a {
+                flex: 1;
             }
 
         </style>
@@ -100,7 +132,11 @@
                         <a href="#!" class="collection-item">Host</a>
                     </div>
                     <div class="collection participant-wrapper">
-                        <a href="#!" class="collection-item"><span class="badge">1</span>Participant 1</a>
+                        <a href="#!" class="collection-item active">
+                            <span class="badge">1</span>
+                            Participant 1
+                            
+                        </a>
                         <a href="#!" class="collection-item"><span class="badge">0</span>Participant 2</a>
                         <a href="#!" class="collection-item"><span class="badge">14</span>Participant 3</a>
                         <a href="#!" class="collection-item"><span class="badge">44</span>Participant 4</a>
@@ -109,8 +145,38 @@
 
                 
 
-                <div class="questioner">
-                    <span>Waiting Participants</span> 
+                <div class="questionnaire">
+                    <div class="category">
+                        <a class="waves-effect waves-teal btn-flat category-title">Ok</a>
+                        <div class="question-wrapper">
+                            <a class="waves-effect waves-light btn-small">Button</a>
+                            <a class="waves-effect waves-light btn-small">Button</a>
+                            <a class="waves-effect waves-light btn-small">Button</a>
+                            <a class="waves-effect waves-light btn-small">Button</a>
+                            <a class="waves-effect waves-light btn-small">Button</a>
+                            <a class="waves-effect waves-light btn-small">Button</a>
+                            <a class="waves-effect waves-light btn-small">Button</a>
+                            <a class="waves-effect waves-light btn-small">Button</a>
+                        </div>
+                        
+                    </div>
+                    <div class="category">
+                        <a class="waves-effect waves-teal btn-flat category-title">Bigger Category</a>
+                        <div class="questionnaire-wrapper">
+                            <a class="waves-effect waves-light btn-small">Button</a>
+                            <a class="waves-effect waves-light btn-small">Button</a>
+                            <a class="waves-effect waves-light btn-small">Button</a>
+                            <a class="waves-effect waves-light btn-small">Button</a>
+                        </div>
+                    </div>
+                    <div class="category">
+                        <a class="waves-effect waves-teal btn-flat category-title">Category</a>
+                        <div class="question-wrapper">
+                            <a class="waves-effect waves-light btn-small">Button</a>
+                            <a class="waves-effect waves-light btn-small">Button</a>
+                            <a class="waves-effect waves-light btn-small">Button</a>
+                        </div>
+                    </div>
                 </div>
             </div>
             

@@ -1,8 +1,9 @@
-<div id="participants" class="collection participant-wrapper" 
-    th:fragment="participants" 
-    th:with="room=${data.room}">
-    <a href="#!" class="collection-item" th:each="participant : ${room.participants}">
-        <span th:text="${participant.nickname}"></span>
+<div id="participants" class="collection participant-wrapper" th:fragment="participants">
+    <a href="#!" 
+        th:each="participant : ${room.participants}"
+        th:class="'collection-item ' + (${room.guesser == participant.name} ? 'active' : '')"
+    >
+        <span th:text="${participant.name}"></span>
         <span class='badge' th:text="${participant.points}"></span>
     </a>
 </div>

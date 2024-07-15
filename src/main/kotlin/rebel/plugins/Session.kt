@@ -15,4 +15,13 @@ fun Application.configureSession() {
 
 }
 
-data class QuizSession(val id: UUID = UUID.randomUUID(), val nickname: String)
+data class QuizSession(
+    val id: UUID = UUID.randomUUID(),
+    val nickname: String,
+    var room: String? = null
+) {
+    fun withRoom(roomName: String): QuizSession {
+        this.room = roomName;
+        return this;
+    }
+}

@@ -4,11 +4,8 @@ import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.selects.selectUnbiased
-import rebel.service.establishParticipantSession
-import rebel.service.roomByName
+import rebel.service.establishRoomSession
+import rebel.utils.roomByParam
 import java.time.Duration
 
 fun Application.configureSockets() {
@@ -21,24 +18,36 @@ fun Application.configureSockets() {
     }
 
     routing {
-        webSocket("/ws") { // websocketSession
+        webSocket("/ws/room/{room}/host/{id}") {
+            val room = call.roomByParam()
+                ?: return@webSocket close(CloseReason(CloseReason.Codes.NORMAL, "No room specified."))
+
+            call.parameters["id"]
+                ?.takeIf { room.host.id.toString() == it }
+                ?.let { room.host.connection = this}
+                ?: return@webSocket close(CloseReason(CloseReason.Codes.NORMAL, "No participant specified."))
+
+            establishRoomSession(room, this)
+
             for (frame in incoming) {
                 if (frame is Frame.Text) {
-                    val text = frame.readText()
-                    outgoing.send(Frame.Text("YOU SAID: $text"))
-                    if (text.equals("bye", ignoreCase = true)) {
-                        close(CloseReason(CloseReason.Codes.NORMAL, "Client said BYE"))
-                    }
+                    println(frame.readText())
                 }
             }
         }
+    }
 
-        webSocket("/ws/room/{name}") {
-            val room = call.parameters["name"]
-                ?.let { roomByName(it) }
+    routing {
+        webSocket("/ws/room/{room}/participant/{id}") {
+            val room = call.roomByParam()
                 ?: return@webSocket close(CloseReason(CloseReason.Codes.NORMAL, "No room specified."))
 
-            establishParticipantSession(room, this)
+            call.parameters["id"]
+                ?.let { id ->  room.participants.find { it.id.toString() == id } }
+                ?.let { it.connection = this}
+                ?: return@webSocket close(CloseReason(CloseReason.Codes.NORMAL, "No participant specified."))
+
+            establishRoomSession(room, this)
 
             for (frame in incoming) {
                 if (frame is Frame.Text) {

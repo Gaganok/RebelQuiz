@@ -1,6 +1,8 @@
 package rebel.service
 
 import io.ktor.util.*
+import io.ktor.websocket.*
+import java.util.UUID
 
 enum class QuestionType {
     IMAGE,
@@ -9,17 +11,34 @@ enum class QuestionType {
 }
 
 data class Question(val question: String, val answer: String, val type: QuestionType, val value: Int)
-data class Pack(val name: String, val qa: List<Question>)
-data class Participant(val nickname: String, val points: Int)
-data class Room(var name: String, var host: String, var quizPack: Pack? = null, var participants: MutableList<Participant> = mutableListOf())
+data class Category(val name: String, val qa: List<Question>)
+data class Pack(val name: String, val questionnaire: List<Category>)
+data class Participant(
+    val id: UUID = UUID.randomUUID(),
+    val name: String,
+    var points: Int,
+    var connection: WebSocketSession? = null)
+
+data class Host(
+    val id: UUID = UUID.randomUUID(),
+    val name: String,
+    var connection: WebSocketSession? = null
+)
+
+data class Room(
+    var name: String,
+    var host: Host,
+    var quizPack: Pack,
+    var participants: MutableList<Participant> = mutableListOf(),
+    var guesser: String? = null)
+
 data class Playground(val rooms: MutableMap<String, Room>)
 
 val playground = initPlayground();
 
 fun initPlayground(): Playground {
-    val testQuestion = Question("What is the capital of Great Britain?", "London", QuestionType.TEXT, 100)
-    val testPack = Pack("Test Pack", listOf(testQuestion))
-    val testRoom = Room("Test room", "None", testPack)
+    val testHost = Host(name = "None")
+    val testRoom = Room("room", testHost, genTestPack())
     return Playground(mutableMapOf(Pair(testRoom.name.toLowerCasePreservingASCIIRules(), testRoom)))
 }
 
