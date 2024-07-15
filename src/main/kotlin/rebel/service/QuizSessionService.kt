@@ -7,8 +7,7 @@ import kotlinx.coroutines.runBlocking
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
-import rebel.utils.participants
-import rebel.utils.questionnaire
+import rebel.utils.*
 import java.io.StringWriter
 import java.util.concurrent.ConcurrentHashMap
 
@@ -44,7 +43,7 @@ fun startQuiz(room: Room) {
     room.guesser = participants[0].name
 
     roomSessions[room.name]
-        ?.let { it.state = RoomState.ONGOING }
+        ?.let { it.state = RoomState.PICKING_QUESTION }
         ?: throw IllegalStateException("No room session found!")
 
     val activeTemplate = renderToString(questionnaire(room.quizPack, true));
@@ -59,6 +58,21 @@ fun startQuiz(room: Room) {
     }
 
     updateParticipants(room)
+}
+
+fun pickQuestion(room: Room, question: Question) {
+    val roomSession = roomSessions[room.name]
+        ?: throw IllegalStateException("No room session found!")
+
+    require(roomSession.state == RoomState.PICKING_QUESTION)
+    roomSession.state = RoomState.ANSWERING
+
+    runBlocking {
+        launch {
+            room.host.connection?.outgoing?.send(questionAnswer(question).frameText())
+            room.participants.forEach { it.connection?.outgoing?.send(question(question).frameText()) }
+        }
+    }
 }
 
 fun renderToString(content: ThymeleafContent): String {
@@ -85,7 +99,8 @@ fun createTemplateEngine(): TemplateEngine {
 
 enum class RoomState{
     WAITING_PARTICIPANTS,
-    ONGOING,
+    PICKING_QUESTION,
+    ANSWERING,
     FINISHED
 }
 

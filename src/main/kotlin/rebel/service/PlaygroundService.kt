@@ -10,7 +10,12 @@ enum class QuestionType {
     TEXT
 }
 
-data class Question(val question: String, val answer: String, val type: QuestionType, val value: Int)
+data class Question(
+    val question: String,
+    val answer: String,
+    val type: QuestionType,
+    val value: Int,
+    val id: UUID = UUID.randomUUID())
 data class Category(val name: String, val qa: List<Question>)
 data class Pack(val name: String, val questionnaire: List<Category>)
 data class Participant(

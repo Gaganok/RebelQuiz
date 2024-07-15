@@ -77,5 +77,21 @@ fun Application.configureRouting() {
 
             call.respond(HttpStatusCode.NoContent)
         }
+
+        get("/room/question/{questionId}") {
+            val session = call.quizSession()
+
+            val room = session.room
+                ?.let { roomByName(it) }
+                ?: throw IllegalStateException("Room is missing from session")
+
+            require(room.guesser == session.nickname || room.host.name == session.nickname) {
+                "Invalid participant participant selected question"
+            }
+
+            pickQuestion(room, findQuestion(room, call.questionId()))
+
+            call.respond(HttpStatusCode.NoContent)
+        }
     }
 }

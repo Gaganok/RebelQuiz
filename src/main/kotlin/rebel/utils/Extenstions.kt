@@ -4,11 +4,10 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.sessions.*
+import io.ktor.server.thymeleaf.*
+import io.ktor.websocket.*
 import rebel.plugins.QuizSession
-import rebel.service.Pack
-import rebel.service.Room
-import rebel.service.packByName
-import rebel.service.roomByName
+import rebel.service.*
 
 fun ApplicationCall.roomByParam(): Room? {
     return this.parameters["room"]
@@ -36,4 +35,14 @@ fun Parameters.packByParam(): Pack {
 
 fun ApplicationCall.quizSession(): QuizSession {
     return this.sessions.get<QuizSession>() ?: throw IllegalArgumentException("Session info is missing");
+}
+
+fun ApplicationCall.questionId(): String {
+    return this.parameters["questionId"]
+        ?.takeUnless { it.isBlank() }
+        ?: throw IllegalArgumentException("Question id is missing or blank")
+}
+
+fun ThymeleafContent.frameText(): Frame.Text {
+    return Frame.Text(renderToString(this))
 }
