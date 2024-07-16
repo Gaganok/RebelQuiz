@@ -130,6 +130,12 @@
                 padding: 10px 20px;
             }
 
+            .control-wrapper {
+                display: flex;
+                justify-content: space-between;
+                width: 100%;
+            }
+
         </style>
     
         <h4 style="margin-left: 25px; color: #9e9e9e">Quiz</Room></h4>
@@ -163,14 +169,21 @@
                 </div>
             </div>
             
-            <div class="control">
-                <a class="waves-effect waves-light btn-large ">Start</a>
-                <a class="waves-effect waves-light btn-large btn-large__error">Leave</a>
+            <div class="control-wrapper">
+                <div class="control">
+                    <a class="waves-effect waves-light btn-large ">Start</a>
+                    <a class="waves-effect waves-light btn-large btn-large__error">Leave</a>
+                </div>
+                <div id="quiz-control" class="quiz-control">
+                    <a class="waves-effect waves-light btn-large ">Start</a>
+                </div>
             </div>
         </div>
 
 
-    
+    <script>
+        let pressedAnswer = false;
+    </script>
     </div>
 </body>
 </html>

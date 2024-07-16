@@ -1,7 +1,6 @@
 package rebel.service
 
 import io.ktor.util.*
-import kotlinx.coroutines.launch
 
 fun newRoom(name: String, hostName: String, pack: Pack): Room {
     val host = Host(name = hostName)

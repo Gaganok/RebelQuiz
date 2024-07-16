@@ -33,6 +33,12 @@ fun Parameters.packByParam(): Pack {
 
 }
 
+fun QuizSession.room(): Room {
+    return this.room
+        ?.let { roomByName(it) }
+        ?: throw IllegalStateException("Room is missing from session")
+}
+
 fun ApplicationCall.quizSession(): QuizSession {
     return this.sessions.get<QuizSession>() ?: throw IllegalArgumentException("Session info is missing");
 }

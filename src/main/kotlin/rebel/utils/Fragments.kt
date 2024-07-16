@@ -14,6 +14,22 @@ fun question(question: Question) : ThymeleafContent {
     return ThymeleafContent("fragments/question", mapOf(Pair("question", question)))
 }
 
+fun answerControl(question: Question) : ThymeleafContent {
+    return ThymeleafContent("fragments/control/answer-control", mapOf(Pair("question", question)))
+}
+
+fun noControl() : ThymeleafContent {
+    return ThymeleafContent("fragments/control/no-control", mapOf())
+}
+
+fun answerInactiveControl() : ThymeleafContent {
+    return ThymeleafContent("fragments/control/answer-inactive-control", mapOf())
+}
+
+fun judgeControl(question: Question) : ThymeleafContent {
+    return ThymeleafContent("fragments/control/judge-control", mapOf(Pair("question", question)))
+}
+
 fun questionAnswer(question: Question) : ThymeleafContent {
     return ThymeleafContent("fragments/question_answer", mapOf(Pair("question", question)))
 }

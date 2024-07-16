@@ -97,8 +97,18 @@
         }
 
         .question {
-            color: #b71c1c;
             padding: 0 20px;
+        }
+
+        .answer {
+            color: #b71c1c;
+            padding: 10px 20px;
+        }
+
+        .control-wrapper {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
         }
 
     </style>
@@ -120,13 +130,17 @@
             </div>
         </div>
         
-        <div class="control-container">
-            <a th:class="'waves-effect waves-light btn-large ' + (${participantStatus.name() == 'HOST'} ? '' : 'disabled')"
-                hx-get="/room/start"
-                hx-swap="none"
-            >Start</a>
-            <a class="waves-effect waves-light btn-large btn-large__error">Leave</a>
+        <div class="control-wrapper">
+            <div class="control-container">
+                <a th:class="'waves-effect waves-light btn-large ' + (${participantStatus.name() == 'HOST'} ? '' : 'disabled')"
+                    hx-get="/room/start"
+                    hx-swap="none"
+                >Start</a>
+                <a class="waves-effect waves-light btn-large btn-large__error">Leave</a>
+            </div>
+            <div id="quiz-control" class="quiz-control"></div>
         </div>
+
     </div>
 
 </div>

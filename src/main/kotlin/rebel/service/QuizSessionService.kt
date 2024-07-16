@@ -19,16 +19,14 @@ fun establishRoomSession(room: Room, session: WebSocketSession) {
 }
 
 fun updateParticipants(room: Room) {
-    val roomSession = roomSessions[room.name]
-        ?: throw IllegalStateException("Room has no session")
+    val roomSession = roomSession(room)
 
     val connections = roomSession.connections
         .takeUnless { it.isEmpty() }
         ?: return;
 
-    val template = renderToString(participants(room));
     runBlocking {
-        launch { connections.forEach {it.outgoing.send(Frame.Text(template))} }
+        launch { connections.forEach { it.outgoing.send(participants(room).frameText()) } }
     }
 }
 
@@ -42,18 +40,22 @@ fun startQuiz(room: Room) {
     participants.shuffle()
     room.guesser = participants[0].name
 
-    roomSessions[room.name]
-        ?.let { it.state = RoomState.PICKING_QUESTION }
-        ?: throw IllegalStateException("No room session found!")
+    nextRound(room)
+}
 
-    val activeTemplate = renderToString(questionnaire(room.quizPack, true));
-    val passiveTemplate = renderToString(questionnaire(room.quizPack, false));
+fun nextRound(room: Room) {
+    roomSession(room).let { it.state = RoomState.PICKING_QUESTION }
+
+    val participants = room.participants;
 
     runBlocking {
         launch {
-            room.host.connection?.outgoing?.send(Frame.Text(activeTemplate))
-            participants[0].connection?.outgoing?.send(Frame.Text(activeTemplate))
-            participants.drop(1).forEach { it.connection?.outgoing?.send(Frame.Text(passiveTemplate)) }
+            room.host.connection?.outgoing?.let {
+                it.send(noControl().frameText())
+                it.send(questionnaire(room.quizPack, true).frameText())
+            }
+            participants[0].connection?.outgoing?.send(questionnaire(room.quizPack, true).frameText())
+            participants.drop(1).forEach { it.connection?.outgoing?.send(questionnaire(room.quizPack, false).frameText()) }
         }
     }
 
@@ -61,17 +63,45 @@ fun startQuiz(room: Room) {
 }
 
 fun pickQuestion(room: Room, question: Question) {
-    val roomSession = roomSessions[room.name]
-        ?: throw IllegalStateException("No room session found!")
+    val roomSession = roomSession(room)
 
-    require(roomSession.state == RoomState.PICKING_QUESTION)
+    room.guesser = null;
+
+    require(roomSession.state == RoomState.PICKING_QUESTION
+            || roomSession.state == RoomState.JUDGING)
+
     roomSession.state = RoomState.ANSWERING
 
     runBlocking {
         launch {
-            room.host.connection?.outgoing?.send(questionAnswer(question).frameText())
-            room.participants.forEach { it.connection?.outgoing?.send(question(question).frameText()) }
+            room.host.connection?.outgoing?.let {
+                it.send(questionAnswer(question).frameText())
+                it.send(noControl().frameText())
+            }
+            room.participants.forEach {
+                it.connection?.outgoing?.send(question(question).frameText())
+                it.connection?.outgoing?.send(answerControl(question).frameText())
+            }
         }
+    }
+}
+
+fun answerQuestion(room: Room, candidateGuesser: String, question: Question) {
+    val roomSession = roomSession(room)
+
+    runBlocking {
+        require(roomSession.state == RoomState.ANSWERING)
+            {"Someone is already answering the question"}
+
+        roomSession.state = RoomState.JUDGING
+        room.guesser = candidateGuesser
+
+        launch {
+            room.host.connection?.outgoing?.send(judgeControl(question).frameText())
+            room.participants.forEach { it.connection?.outgoing?.send(answerInactiveControl().frameText()) }
+        }
+
+        updateParticipants(room)
     }
 }
 
@@ -97,10 +127,16 @@ fun createTemplateEngine(): TemplateEngine {
     }
 }
 
+fun roomSession(room: Room): RoomSession {
+    return roomSessions[room.name]
+        ?: throw IllegalStateException("No room session found!")
+}
+
 enum class RoomState{
     WAITING_PARTICIPANTS,
     PICKING_QUESTION,
     ANSWERING,
+    JUDGING,
     FINISHED
 }
 

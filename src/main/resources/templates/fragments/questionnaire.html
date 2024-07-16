@@ -2,8 +2,8 @@
     <div class="category" th:each="category : ${questionnaire}">
         <a class="waves-effect waves-teal btn-flat category-title" th:text="${category.name}"></a>
         <div class="questionnaire-wrapper">
-            <a th:class="'waves-effect waves-light btn-small ' + (${active} ? '' : 'disabled')" 
-                th:each="question : ${category.qa}" 
+            <a th:each="question : ${category.qa}" 
+                th:class="'waves-effect waves-light ' + (${question.isAnswered} ? 'btn-flat disabled ' : 'btn-small ') + (${active} ? '' : 'disabled')" 
                 th:text="${question.value}"
                 th:attr="hx-get='/room/question/' + ${question.id}"
                 hx-swap="none"

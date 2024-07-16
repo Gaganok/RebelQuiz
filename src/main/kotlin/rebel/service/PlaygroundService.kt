@@ -15,7 +15,8 @@ data class Question(
     val answer: String,
     val type: QuestionType,
     val value: Int,
-    val id: UUID = UUID.randomUUID())
+    val id: UUID = UUID.randomUUID(),
+    var isAnswered: Boolean = false)
 data class Category(val name: String, val qa: List<Question>)
 data class Pack(val name: String, val questionnaire: List<Category>)
 data class Participant(

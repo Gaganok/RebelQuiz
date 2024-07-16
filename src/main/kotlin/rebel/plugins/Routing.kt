@@ -93,5 +93,49 @@ fun Application.configureRouting() {
 
             call.respond(HttpStatusCode.NoContent)
         }
+
+        get("/room/answer/{questionId}") {
+            val session = call.quizSession()
+            val room = session.room()
+
+//            require(session.nickname != room.host.name) {"Host cannot answer a question"}
+
+            answerQuestion(room, session.nickname, findQuestion(room, call.questionId()))
+
+            call.respond(HttpStatusCode.NoContent)
+        }
+
+        get("/room/correct/{questionId}") {
+            val session = call.quizSession()
+            val room = session.room()
+
+            require(room.host.name == session.nickname) {
+                "Non-host participant not allowed to judge"
+            }
+
+            val question = findQuestion(room, call.questionId())
+            question.isAnswered = true
+
+            room.participants.find { it.name == room.guesser }
+                ?.let { it.points += question.value }
+                ?: throw IllegalStateException("Participant not found")
+
+            nextRound(room)
+
+            call.respond(HttpStatusCode.NoContent)
+        }
+
+        get("/room/wrong/{questionId}") {
+            val session = call.quizSession()
+            val room = session.room()
+
+            require(room.host.name == session.nickname) {
+                "Non-host participant cannot judge"
+            }
+
+            pickQuestion(room, findQuestion(room, call.questionId()))
+
+            call.respond(HttpStatusCode.NoContent)
+        }
     }
 }
