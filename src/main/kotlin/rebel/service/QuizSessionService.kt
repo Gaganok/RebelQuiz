@@ -21,6 +21,8 @@ fun establishRoomSession(room: Room, session: WebSocketSession) {
 fun updateParticipants(room: Room) {
     val roomSession = roomSession(room)
 
+    room.participants.sortByDescending { it.points }
+
     val connections = roomSession.connections
         .takeUnless { it.isEmpty() }
         ?: return;
@@ -37,25 +39,67 @@ fun startQuiz(room: Room) {
         "Not allowed to start an empty room"
     }
 
-    participants.shuffle()
-    room.guesser = participants[0].name
-
+    resetRoom(room)
     nextRound(room)
+}
+
+fun resetRoom(room: Room) {
+    room.participants.let {
+        it.shuffle()
+        it.forEach{ it.points = 0 }
+    }
+
+    room.guesser = room.participants[0].name
+    room.winner = null;
+
+    room.quizPack.questionnaire
+        .flatMap { it.qa }
+        .forEach {it.isAnswered = false}
 }
 
 fun nextRound(room: Room) {
     roomSession(room).let { it.state = RoomState.PICKING_QUESTION }
 
+    removeControl(room)
+
+    if (room.quizPack.hasNoQuestionLeft()) {
+        return quitQuiz(room)
+    }
+
     val participants = room.participants;
 
     runBlocking {
         launch {
-            room.host.connection?.outgoing?.let {
-                it.send(noControl().frameText())
-                it.send(questionnaire(room.quizPack, true).frameText())
-            }
+            room.host.connection?.outgoing?.send(questionnaire(room.quizPack, true).frameText())
             participants[0].connection?.outgoing?.send(questionnaire(room.quizPack, true).frameText())
             participants.drop(1).forEach { it.connection?.outgoing?.send(questionnaire(room.quizPack, false).frameText()) }
+        }
+    }
+
+    updateParticipants(room)
+}
+
+fun removeControl(room: Room) {
+    runBlocking {
+        launch {
+            room.host.connection?.outgoing?.send(noControl().frameText())
+            room.participants.forEach { it.connection?.outgoing?.send(noControl().frameText()) }
+        }
+    }
+}
+
+fun quitQuiz(room: Room) {
+    val roomSession = roomSession(room)
+    roomSession.let { it.state = RoomState.WAITING_PARTICIPANTS }
+
+    room.selectWinner()
+
+    runBlocking {
+        launch {
+            roomSession.connections.forEach {
+                it.outgoing.send(winnerBoard().frameText())
+//                it.close(CloseReason(CloseReason.Codes.NORMAL, "Bye"))
+            }
         }
     }
 
@@ -136,8 +180,7 @@ enum class RoomState{
     WAITING_PARTICIPANTS,
     PICKING_QUESTION,
     ANSWERING,
-    JUDGING,
-    FINISHED
+    JUDGING
 }
 
 data class RoomSession(

@@ -4,6 +4,6 @@
         th:class="'collection-item ' + (${room.guesser == participant.name} ? 'active' : '')"
     >
         <span th:text="${participant.name}"></span>
-        <span class='badge' th:text="${participant.points}"></span>
+        <span class='badge' th:text="${participant.points} + (${participant.name == room.winner} ? '  👑' : '')"></span>
     </a>
 </div>

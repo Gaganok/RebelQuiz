@@ -30,8 +30,8 @@ fun Application.configureSockets() {
             establishRoomSession(room, this)
 
             for (frame in incoming) {
-                if (frame is Frame.Text) {
-                    println(frame.readText())
+                if (frame is Frame.Close) {
+                    break;
                 }
             }
         }
@@ -50,8 +50,8 @@ fun Application.configureSockets() {
             establishRoomSession(room, this)
 
             for (frame in incoming) {
-                if (frame is Frame.Text) {
-                    println(frame.readText())
+                if (frame is Frame.Close) {
+                    break;
                 }
             }
 

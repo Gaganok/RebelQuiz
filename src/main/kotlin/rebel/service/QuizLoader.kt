@@ -33,5 +33,8 @@ fun genTestPack() : Pack {
         Question("Elijah Wood, Orlando Bloom, Viggo Mortensen", "The Lord of the Rings", QuestionType.TEXT, 300),
     ))
 
-    return Pack("Test Pack", listOf(testCapitalCategory, testActorCategory))
+    return Pack("Test Pack", listOf(
+        testCapitalCategory,
+//        testActorCategory
+    ))
 }

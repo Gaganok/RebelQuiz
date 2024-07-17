@@ -14,6 +14,10 @@ fun question(question: Question) : ThymeleafContent {
     return ThymeleafContent("fragments/question", mapOf(Pair("question", question)))
 }
 
+fun winnerBoard() : ThymeleafContent {
+    return ThymeleafContent("fragments/winner-board", mapOf())
+}
+
 fun answerControl(question: Question) : ThymeleafContent {
     return ThymeleafContent("fragments/control/answer-control", mapOf(Pair("question", question)))
 }

@@ -18,7 +18,11 @@ data class Question(
     val id: UUID = UUID.randomUUID(),
     var isAnswered: Boolean = false)
 data class Category(val name: String, val qa: List<Question>)
-data class Pack(val name: String, val questionnaire: List<Category>)
+data class Pack(val name: String, val questionnaire: List<Category>) {
+    fun hasNoQuestionLeft(): Boolean {
+        return !questionnaire.flatMap { it.qa }.any { !it.isAnswered }
+    }
+}
 data class Participant(
     val id: UUID = UUID.randomUUID(),
     val name: String,
@@ -36,7 +40,13 @@ data class Room(
     var host: Host,
     var quizPack: Pack,
     var participants: MutableList<Participant> = mutableListOf(),
-    var guesser: String? = null)
+    var guesser: String? = null,
+    var winner: String? = null
+) {
+    fun selectWinner() {
+        winner = participants.maxBy { it.points }.name
+    }
+}
 
 data class Playground(val rooms: MutableMap<String, Room>)
 
