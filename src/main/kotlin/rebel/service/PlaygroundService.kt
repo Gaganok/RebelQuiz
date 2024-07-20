@@ -7,7 +7,8 @@ import java.util.UUID
 enum class QuestionType {
     IMAGE,
     VIDEO,
-    TEXT
+    AUDIO,
+    TEXT;
 }
 
 data class Question(
@@ -17,6 +18,7 @@ data class Question(
     val value: Int,
     val id: UUID = UUID.randomUUID(),
     var isAnswered: Boolean = false)
+
 data class Category(val name: String, val qa: List<Question>)
 data class Pack(val name: String, val questionnaire: List<Category>) {
     fun hasNoQuestionLeft(): Boolean {

@@ -1,4 +1,4 @@
 <div id="questionnaire" class="questionnaire">
-    <div class="question" th:text="${question.question}"></div>
+    <div th:replace="~{fragments/question-fragment :: #question}"></div>
     <div class="answer" th:text="${question.answer}"></div>
 </div>

@@ -2,16 +2,38 @@ package rebel.plugins
 
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.http.content.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import rebel.service.*
 import rebel.utils.*
+import java.io.File
 
 fun Application.configureRouting() {
 
     routing {
+
+        staticResources("/resources", "static") {
+            contentType { url ->
+                when {
+                    url.file.endsWith(".mp3", ignoreCase = true) -> ContentType.Audio.MPEG
+                    url.file.endsWith(".png", ignoreCase = true) -> ContentType.Image.PNG
+                    else -> ContentType.Text.Plain
+                }
+            }
+        }
+//
+//        staticFiles("/audio", File("audio")) {
+//            contentType { file ->
+//                when {
+//                    file.name.endsWith(".mp3", ignoreCase = true) -> ContentType.Audio.MPEG
+//                    else -> ContentType.Text.Html
+//                }
+//            }
+//        }
+
         get("/") {
             call.respond(welcome())
         }
