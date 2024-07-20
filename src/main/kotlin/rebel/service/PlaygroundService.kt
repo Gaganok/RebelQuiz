@@ -55,13 +55,11 @@ data class Playground(val rooms: MutableMap<String, Room>)
 val playground = initPlayground();
 
 fun initPlayground(): Playground {
-    val testHost = Host(name = "None")
-    val testRoom = Room("room", testHost, genTestPack())
-    return Playground(mutableMapOf(Pair(testRoom.name.toLowerCasePreservingASCIIRules(), testRoom)))
+    return Playground(mutableMapOf())
 }
 
 fun rooms(): Collection<Room> {
-    return playground.rooms.values;
+    return playground.rooms.values.filter { roomStatus(it) == RoomState.WAITING_PARTICIPANTS }
 }
 
 fun roomByName(name: String): Room {

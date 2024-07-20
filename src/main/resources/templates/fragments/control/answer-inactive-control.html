@@ -1,3 +1,8 @@
 <div id="quiz-control" class="quiz-control">
   <a id="answer-button" class="waves-effect waves-light btn-large disabled">ANSWER</a>
+
+  <script>
+    Array.from(document.getElementsByClassName("playable"))
+      .forEach(playable => playable.pause());
+  </script>
 </div>

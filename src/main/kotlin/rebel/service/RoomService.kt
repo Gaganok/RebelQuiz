@@ -13,6 +13,10 @@ fun joinRoom(participant: Participant, roomName: String): Room {
     val room = roomByName(roomName)
     room.participants.add(participant)
 
+    require( roomStatus(room) == RoomState.WAITING_PARTICIPANTS ) {
+        "Room is no longer waiting participants"
+    }
+
     updateParticipants(room)
 
     return room

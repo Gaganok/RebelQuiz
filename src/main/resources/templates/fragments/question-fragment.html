@@ -5,13 +5,13 @@
         <img th:src="@{${question.question}}" alt="Oops there should be an Image. Sowwy(">
     </div>
     <div class="question" th:if="${question.type.toString() == 'AUDIO'}">
-      <audio controls autoplay>
+      <audio autoplay class="playable">
         <source th:src="@{${question.question}}" type="audio/mpeg">
         I hope you don't see this (Should be music playing instead)
       </audio>
     </div>
     <div class="question" th:if="${question.type.toString() == 'VIDEO'}">
-      <video controls autoplay>
+      <video autoplay class="playable">
         <source th:src="@{${question.question}}" type="video/mp4">
         I hope you don't see this (Should be video playing instead)
       </video>

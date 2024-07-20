@@ -9,23 +9,18 @@
   <script>
     pressedAnswer = false;
 
-    document.addEventListener('DOMContentLoaded', (event) => {
-        document.addEventListener('keydown', function(event) {
-            if (event.code === 'Space') {
-                console.log("space bar hit")
-                event.preventDefault();
-                answerButtonHandler();
-            }
-        });
+    document.addEventListener('keydown', function(event) {
+        if (event.code === 'Space') {
+            event.preventDefault();
+            answerButtonHandler();
+        }
     });
 
     function answerButtonHandler() {
-      console.log(pressedAnswer)
       if(pressedAnswer) return;
 
       pressedAnswer = true;
       htmx.trigger("#answer-button", "answer-event")
-      console.log("trigger htmx")
     }
   </script>
 </div>

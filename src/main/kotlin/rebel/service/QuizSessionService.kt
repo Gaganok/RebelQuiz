@@ -98,7 +98,6 @@ fun quitQuiz(room: Room) {
         launch {
             roomSession.connections.forEach {
                 it.outgoing.send(winnerBoard().frameText())
-//                it.close(CloseReason(CloseReason.Codes.NORMAL, "Bye"))
             }
         }
     }
@@ -120,7 +119,7 @@ fun pickQuestion(room: Room, question: Question) {
         launch {
             room.host.connection?.outgoing?.let {
                 it.send(questionAnswer(question).frameText())
-                it.send(noControl().frameText())
+                it.send(judgeSkipControl(question).frameText())
             }
             room.participants.forEach {
                 it.connection?.outgoing?.send(question(question).frameText())
@@ -174,6 +173,10 @@ fun createTemplateEngine(): TemplateEngine {
 fun roomSession(room: Room): RoomSession {
     return roomSessions[room.name]
         ?: throw IllegalStateException("No room session found!")
+}
+
+fun roomStatus(room: Room): RoomState {
+    return roomSession(room).state
 }
 
 enum class RoomState{

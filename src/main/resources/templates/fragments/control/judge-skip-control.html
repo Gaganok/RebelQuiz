@@ -1,0 +1,6 @@
+<div id="quiz-control" class="quiz-control">
+  <a id="wrong-button" class="waves-effect waves-light btn-large btn-large__error" 
+    th:attr="hx-get='/room/skip/' + ${question.id}"
+    hx-swap="none"
+  >Skip</a>
+</div>

@@ -7,4 +7,9 @@
     th:attr="hx-get='/room/wrong/' + ${question.id}"
     hx-swap="none"
   >WRONG</a>
+
+  <script>
+    Array.from(document.getElementsByClassName("playable"))
+      .forEach(playable => playable.pause());
+  </script>
 </div>

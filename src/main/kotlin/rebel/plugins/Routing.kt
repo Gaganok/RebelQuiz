@@ -9,7 +9,6 @@ import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import rebel.service.*
 import rebel.utils.*
-import java.io.File
 
 fun Application.configureRouting() {
 
@@ -24,15 +23,6 @@ fun Application.configureRouting() {
                 }
             }
         }
-//
-//        staticFiles("/audio", File("audio")) {
-//            contentType { file ->
-//                when {
-//                    file.name.endsWith(".mp3", ignoreCase = true) -> ContentType.Audio.MPEG
-//                    else -> ContentType.Text.Html
-//                }
-//            }
-//        }
 
         get("/") {
             call.respond(welcome())
@@ -156,6 +146,21 @@ fun Application.configureRouting() {
             }
 
             pickQuestion(room, findQuestion(room, call.questionId()))
+
+            call.respond(HttpStatusCode.NoContent)
+        }
+
+        get("/room/skip/{questionId}") {
+            val session = call.quizSession()
+            val room = session.room()
+
+            require(room.host.name == session.nickname) {
+                "Non-host participant cannot skip"
+            }
+
+            findQuestion(room, call.questionId()).isAnswered = true
+
+            nextRound(room)
 
             call.respond(HttpStatusCode.NoContent)
         }

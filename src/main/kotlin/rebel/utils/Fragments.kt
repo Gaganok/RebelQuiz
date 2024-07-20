@@ -34,6 +34,10 @@ fun judgeControl(question: Question) : ThymeleafContent {
     return ThymeleafContent("fragments/control/judge-control", mapOf(Pair("question", question)))
 }
 
+fun judgeSkipControl(question: Question) : ThymeleafContent {
+    return ThymeleafContent("fragments/control/judge-skip-control", mapOf(Pair("question", question)))
+}
+
 fun questionAnswer(question: Question) : ThymeleafContent {
     return ThymeleafContent("fragments/question_answer", mapOf(Pair("question", question)))
 }
