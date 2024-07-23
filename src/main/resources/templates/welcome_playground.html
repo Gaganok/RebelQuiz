@@ -56,21 +56,6 @@
     </style>
 </head>
 <body>
-    <div id="view">
-        <h2 style="margin-left: 25px; color: #9e9e9e">Rebel Quiz</h2>
-        <div class="input-wrapper">
-            <div class="input-field col s6">
-                <input id="nickname" name="nickname" type="text" class="validate">
-                <label class="center-align" for="nickname">Nickname</label>
-            </div>
-            <a id="continue" class="waves-effect waves-light btn btn-custom" 
-                hx-post="/playground" 
-                hx-target="#view"
-                hx-include="#nickname"
-                hx-swap="outerHTML"
-            >Continue</a>
-        </div>
-    </div>
-    <!-- <script type="text/javascript" src="js/materialize.min.js"></script> -->
+    <div th:replace="playground_min :: playground"></div>
 </body>
 </html>

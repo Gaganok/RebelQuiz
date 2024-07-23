@@ -1,8 +1,7 @@
 package rebel.service
 
-import io.ktor.util.*
 import io.ktor.websocket.*
-import java.util.UUID
+import java.util.*
 
 enum class QuestionType {
     IMAGE,
@@ -63,6 +62,5 @@ fun rooms(): Collection<Room> {
 }
 
 fun roomByName(name: String): Room {
-    return playground.rooms[name.toLowerCasePreservingASCIIRules()]
-        ?:throw IllegalArgumentException("Room with name $name is not found");
+    return playground.rooms[name] ?:throw IllegalArgumentException("Room with name $name is not found");
 }

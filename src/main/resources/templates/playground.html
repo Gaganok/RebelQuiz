@@ -61,6 +61,7 @@
             
             .button-wrapper {
                 display: flex;
+                /* gap: 5px; */
                 justify-content: space-between;
             }
         </style>
@@ -74,11 +75,17 @@
                     hx-target="#view"
                     hx-swap="outerHTML"
                 >Create Room</a>
-                <a class="waves-effect waves-light btn btn-custom" 
+                <!-- <a class="waves-effect waves-light btn btn-custom" 
                     hx-get="/room/join" 
                     hx-target="#view"
                     hx-swap="outerHTML"
-                >Join</a>
+                >Join</a> -->
+
+                <a class="waves-effect waves-light btn btn-custom" 
+                hx-get="/room/join" 
+                hx-target="#view"
+                hx-swap="outerHTML"
+                >exit</a>
             </div>
         </div>
     </div>

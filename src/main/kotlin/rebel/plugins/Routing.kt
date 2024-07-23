@@ -25,6 +25,19 @@ fun Application.configureRouting() {
         }
 
         get("/") {
+            val template = call.sessions.get<QuizSession>()
+                ?.let { welcomePlayground() }
+                ?: welcome()
+
+            call.respond(template)
+        }
+
+        get("/exit") {
+            require(call.sessions.get<QuizSession>()?.room == null) {
+                "Unable to exit when still assigned to a room"
+            }
+
+            call.sessions.clear<QuizSession>()
             call.respond(welcome())
         }
 
@@ -38,6 +51,15 @@ fun Application.configureRouting() {
         }
 
         get("/playground/refresh") {
+            val session = call.quizSession();
+
+            session.room
+                ?.takeUnless {
+                    playground.rooms[it]
+                        ?.let { it.participants.any { it.name == session.nickname } }
+                        ?: false
+                }.let { call.sessions.set(session.apply { room = null }) }
+
             call.respond(roomList())
         }
 
@@ -74,6 +96,29 @@ fun Application.configureRouting() {
             call.respond(room(room, participant.id, ParticipantStatus.VIEWER))
         }
 
+        get("/room/leave") {
+            val session = call.quizSession();
+
+            require(session.room != null) {
+                "User session doesn't contain a room"
+            }
+
+            val room = roomByName(session.room!!)
+
+            if (room.host.name == session.nickname) {
+                playground.rooms.remove(room.name)
+                disbandRoom(room)
+            } else {
+                room.participants.find { it.name == session.nickname }
+                    ?.let {
+                        room.participants.remove(it)
+                        leaveRoom(it, room)
+                    } ?: throw IllegalStateException("User is not in the room");
+            }
+
+            call.respond(HttpStatusCode.NoContent)
+        }
+
         get("/room/start") {
             val session = call.quizSession();
 
@@ -105,6 +150,8 @@ fun Application.configureRouting() {
 
             call.respond(HttpStatusCode.NoContent)
         }
+
+        // Question Flow
 
         get("/room/answer/{questionId}") {
             val session = call.quizSession()

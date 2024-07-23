@@ -1,6 +1,6 @@
 <div th:fragment="question" th:with="questionType=${question.type.toString()}">
   <div id="question">
-    <div class="question" th:if="${questionType == 'TEXT'}" th:text="${question.question}"></div>
+    <div class="question" th:if="${question.type.toString() == 'TEXT'}" th:text="${question.question}"></div>
     <div class="question" th:if="${question.type.toString() == 'IMAGE'}">
         <img th:src="@{${question.question}}" alt="Oops there should be an Image. Sowwy(">
     </div>

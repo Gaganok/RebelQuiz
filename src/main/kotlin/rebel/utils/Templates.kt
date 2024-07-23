@@ -36,3 +36,7 @@ fun playground() : ThymeleafContent {
 fun welcome() : ThymeleafContent {
     return ThymeleafContent("welcome", mapOf())
 }
+
+fun welcomePlayground() : ThymeleafContent {
+    return ThymeleafContent("welcome_playground", mapOf())
+}

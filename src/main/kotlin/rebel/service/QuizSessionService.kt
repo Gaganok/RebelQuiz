@@ -43,6 +43,31 @@ fun startQuiz(room: Room) {
     nextRound(room)
 }
 
+fun leaveRoom(participant: Participant, room: Room) {
+    val roomSession = roomSession(room)
+
+    runBlocking {
+        launch {
+            participant.connection?.close(CloseReason(CloseReason.Codes.NORMAL, "Left"))
+            roomSession.connections.remove(participant.connection)
+        }
+    }
+
+    updateParticipants(room)
+}
+
+fun disbandRoom(room: Room) {
+    val roomSession = roomSession(room)
+
+    runBlocking {
+        launch {
+            roomSession.connections.forEach { it.close(CloseReason(CloseReason.Codes.NORMAL, "Disband")) }
+        }
+    }
+
+    roomSessions.remove(room.name)
+}
+
 fun resetRoom(room: Room) {
     room.participants.let {
         it.shuffle()
@@ -71,8 +96,9 @@ fun nextRound(room: Room) {
     runBlocking {
         launch {
             room.host.connection?.outgoing?.send(questionnaire(room.quizPack, true).frameText())
-            participants[0].connection?.outgoing?.send(questionnaire(room.quizPack, true).frameText())
-            participants.drop(1).forEach { it.connection?.outgoing?.send(questionnaire(room.quizPack, false).frameText()) }
+            participants.forEach { it.connection?.outgoing?.send(
+                questionnaire(room.quizPack, it.name == room.guesser).frameText()
+            ) }
         }
     }
 

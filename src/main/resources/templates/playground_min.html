@@ -1,4 +1,4 @@
-<div id="view">
+<div id="view" th:fragment="playground">
     <style scoped>
         .playground-wrapper {
             display: flex;
@@ -38,10 +38,18 @@
             border: none;
             min-width: 150px;
         }
+
+        .btn-error {
+            background-color: #e57373 !important;
+        }
         
         .button-wrapper {
             display: flex;
             justify-content: space-between;
+        }
+
+        .hidden {
+            display: none;
         }
     </style>
 
@@ -49,7 +57,7 @@
     <div class="playground-wrapper" >
         <ul id="room_list" class="collection with-header" 
             hx-get="/playground/refresh" 
-            hx-trigger="every 5s"
+            hx-trigger="load, every 5s"
             th:insert="fragments/rooms :: rooms"
         ></ul>
         <div class="button-wrapper">
@@ -58,41 +66,47 @@
                 hx-target="#view"
                 hx-swap="outerHTML"
             >Create Room</a>
-            <a class="waves-effect waves-light btn btn-custom" 
+             <a id="join" class="hidden" 
                 hx-post="/room/join" 
                 hx-target="#view"
                 hx-vals='js:{roomName: selectedRoomName()}'
                 hx-swap="outerHTML"
+                hx-trigger="letsJoin"
             >Join</a>
+            <a class="waves-effect waves-light btn btn-custom btn-error" 
+                hx-get="/exit" 
+                hx-target="#view"
+                hx-swap="outerHTML"
+            >Exit</a>
         </div>
     </div>
 
     <script>
-        let selectedRoom = null;
 
         function selectRoom(e) {
-            console.log("room clicked!")
-
-            if(selectedRoom == event.target) {
-                //trigger
+            if(document.selectedRoom == event.target) {
+                const joinButton = document.getElementById('join');
+                const joinEvent = new Event('letsJoin');
+                joinButton.dispatchEvent(joinEvent);
+                document.selectedRoom = null;
             } else {
-                selectedRoom?.classList.remove("active")
-                selectedRoom = event.target
-                selectedRoom.classList.add("active")
+                document.selectedRoom?.classList.remove("active")
+                document.selectedRoom = event.target
+                document.selectedRoom.classList.add("active")
             }
         }
 
         function selectedRoomName() {
-            return selectedRoom.textContent
+            return document.selectedRoom.textContent
         }
 
         document.addEventListener('htmx:afterRequest', function (e) {
-            if (selectedRoom && e.detail.elt.id === 'room_list') {
+            if (document.selectedRoom && e.detail.elt.id === 'room_list') {
                 const rooms = document.querySelectorAll('.collection-item');
                 for (const room of rooms) {
                     if (room.textContent === selectedRoom.textContent) {
-                        selectedRoom = room
-                        selectedRoom.classList.add("active")
+                        document.selectedRoom = room
+                        document.selectedRoom.classList.add("active")
                         break;
                     }
                 }
