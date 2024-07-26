@@ -153,6 +153,8 @@ fun pickQuestion(room: Room, question: Question) {
             }
         }
     }
+
+    updateParticipants(room)
 }
 
 fun answerQuestion(room: Room, candidateGuesser: String, question: Question) {

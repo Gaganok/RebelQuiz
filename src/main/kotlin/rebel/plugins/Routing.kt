@@ -151,8 +151,6 @@ fun Application.configureRouting() {
             call.respond(HttpStatusCode.NoContent)
         }
 
-        // Question Flow
-
         get("/room/answer/{questionId}") {
             val session = call.quizSession()
             val room = session.room()
@@ -191,6 +189,12 @@ fun Application.configureRouting() {
             require(room.host.name == session.nickname) {
                 "Non-host participant cannot judge"
             }
+
+            val question = findQuestion(room, call.questionId())
+
+            room.participants.find { it.name == room.guesser }
+                ?.let { it.points -= question.value }
+                ?: throw IllegalStateException("Participant not found")
 
             pickQuestion(room, findQuestion(room, call.questionId()))
 
