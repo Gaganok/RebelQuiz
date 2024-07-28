@@ -18,10 +18,16 @@ data class Question(
     val id: UUID = UUID.randomUUID(),
     var isAnswered: Boolean = false)
 
-data class Category(val name: String, val qa: List<Question>)
+data class Category(val name: String, val qa: List<Question>, val description: String? = null)
+
 data class Pack(val name: String, val questionnaire: List<Category>) {
     fun hasNoQuestionLeft(): Boolean {
         return !questionnaire.flatMap { it.qa }.any { !it.isAnswered }
+    }
+
+    fun categoryByQuestion(question: Question): Category {
+        return questionnaire.find { it.qa.contains(question) }
+            ?: throw IllegalArgumentException("Question does not belong to the pack")
     }
 }
 data class Participant(

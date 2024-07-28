@@ -143,7 +143,7 @@ fun Application.configureRouting() {
                 ?: throw IllegalStateException("Room is missing from session")
 
             require(room.guesser == session.nickname || room.host.name == session.nickname) {
-                "Invalid participant participant selected question"
+                "Invalid participant selected question"
             }
 
             pickQuestion(room, findQuestion(room, call.questionId()))
@@ -158,6 +158,15 @@ fun Application.configureRouting() {
 //            require(session.nickname != room.host.name) {"Host cannot answer a question"}
 
             answerQuestion(room, session.nickname, findQuestion(room, call.questionId()))
+
+            call.respond(HttpStatusCode.NoContent)
+        }
+
+        get("/room/question/loaded") {
+            val session = call.quizSession()
+            val room = session.room()
+
+            loaded(room)
 
             call.respond(HttpStatusCode.NoContent)
         }

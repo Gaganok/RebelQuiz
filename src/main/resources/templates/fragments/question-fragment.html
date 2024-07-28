@@ -1,20 +1,64 @@
-<div th:fragment="question" th:with="questionType=${question.type.toString()}">
+<div th:fragment="question">
   <div id="question">
-    <div class="question" th:if="${question.type.toString() == 'TEXT'}" th:text="${question.question}"></div>
-    <div class="question" th:if="${question.type.toString() == 'IMAGE'}">
-        <img class="fixed" th:src="@{${question.question}}" alt="Oops there should be an Image. Sowwy(">
+    <div id="question_placeholder">
+      <div class="question"  th:text="|${category.name} - ${question.value}|"></div>
+      <div class="question"  th:if="${category.description != null}" th:text="${category.description}"></div>
     </div>
-    <div class="question" th:if="${question.type.toString() == 'AUDIO'}">
-      <audio autoplay class="playable">
+
+    <div id="question_wrapper" class="question hidden" th:if="${question.type.toString() == 'TEXT'}" th:text="${question.question}">
+      <script>document.questionLoaded()</script>
+    </div>
+    <div id="question_wrapper" class="question hidden" th:if="${question.type.toString() == 'IMAGE'}">
+        <img id="question_content" class="fixed" th:src="@{${question.question}}" alt="Oops there should be an Image. Sowwy(">
+        <script>document.getElementById('question_content').addEventListener('load', () => document.questionLoaded());</script>
+    </div>
+    <div id="question_wrapper" class="question hidden" th:if="${question.type.toString() == 'AUDIO'}">
+      <audio id="question_content" class="playable">
         <source th:src="@{${question.question}}" type="audio/mpeg">
         I hope you don't see this (Should be music playing instead)
       </audio>
+      <script>document.getElementById('question_content').addEventListener('loadeddata', () => document.questionLoaded());</script>
     </div>
-    <div class="question" th:if="${question.type.toString() == 'VIDEO'}">
-      <video autoplay class="playable fixed">
+    <div id="question_wrapper" class="question hidden" th:if="${question.type.toString() == 'VIDEO'}">
+      <video id="question_content" class="playable fixed">
         <source th:src="@{${question.question}}" type="video/mp4">
         I hope you don't see this (Should be video playing instead)
       </video>
+      <script>document.getElementById('question_content').addEventListener('loadeddata', () => document.questionLoaded());</script>
+    </div>
+
+    <div id="question_script"
+    hx-get="/room/question/loaded"
+    hx-swap="none"
+    hx-trigger="loadedTrigger"
+    >   
+      <script>
+
+        document.notifyQuestionReady = () => {
+          console.log("trigger request to notify back")
+          let element = document.getElementById('question_script')
+          console.log(element)
+          element.dispatchEvent(new Event('loadedTrigger'));
+          // document.getElementById('question_script').dispatchEvent(new Event('loadedTrigger'));
+        }
+    
+        console.log("question script executed")
+        document.questionLoaded = () => {
+          document.isQuestionTransitionDone && document.notifyQuestionReady()
+          document.isQuestionMediaLoaded = true;
+        }
+    
+        setTimeout(() => {
+          console.log("timeout reached")
+          if(document.isQuestionMediaLoaded) {
+            document.notifyQuestionReady()
+          } else {
+            document.isQuestionTransitionDone = true;
+          }
+        }, 1500)
+    
+      </script>
     </div>
   </div>
+
 </div>

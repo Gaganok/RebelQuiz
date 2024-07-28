@@ -1,0 +1,8 @@
+<div id="question_script">
+    <script>
+        document.getElementById("question_placeholder").classList.add('hidden')
+        document.getElementById("question_wrapper").classList.remove('hidden')
+        Array.from(document.getElementsByClassName("playable"))
+            .forEach(playable => playable.play());
+    </script>
+</div>

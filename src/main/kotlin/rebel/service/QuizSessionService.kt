@@ -141,20 +141,41 @@ fun pickQuestion(room: Room, question: Question) {
 
     roomSession.state = RoomState.ANSWERING
 
+    val category = room.quizPack.categoryByQuestion(question)
+
     runBlocking {
         launch {
             room.host.connection?.outgoing?.let {
-                it.send(questionAnswer(question).frameText())
+                it.send(questionAnswer(question, category).frameText())
                 it.send(judgeSkipControl(question).frameText())
             }
             room.participants.forEach {
-                it.connection?.outgoing?.send(question(question).frameText())
+                it.connection?.outgoing?.send(question(question, category).frameText())
                 it.connection?.outgoing?.send(answerControl(question).frameText())
             }
         }
     }
 
     updateParticipants(room)
+}
+
+fun loaded(room: Room) {
+    val roomSession = roomSession(room)
+
+    require(roomSession.state == RoomState.ANSWERING)
+
+    runBlocking {
+        roomSession
+            .apply { ++loadedCount }
+            .takeIf { room.participants.size + 1 == it.loadedCount }
+            ?.apply { loadedCount = 0 }
+            .run {
+                room.host.connection?.outgoing?.send(displayQuestion().frameText())
+                room.participants.forEach {
+                    it.connection?.outgoing?.send(displayQuestion().frameText())
+                }
+            }
+    }
 }
 
 fun answerQuestion(room: Room, candidateGuesser: String, question: Question) {
@@ -217,4 +238,5 @@ enum class RoomState{
 data class RoomSession(
     val connections: MutableList<WebSocketSession> = mutableListOf(),
     var state: RoomState = RoomState.WAITING_PARTICIPANTS,
+    var loadedCount: Int = 0
 )

@@ -1,17 +1,17 @@
 package rebel.utils
 
 import io.ktor.server.thymeleaf.*
-import rebel.service.Pack
-import rebel.service.Question
-import rebel.service.Room
-import rebel.service.rooms
+import rebel.service.*
 
 fun roomList() : ThymeleafContent {
     return ThymeleafContent("fragments/rooms", mapOf(Pair("rooms", rooms())))
 }
 
-fun question(question: Question) : ThymeleafContent {
-    return ThymeleafContent("fragments/question", mapOf(Pair("question", question)))
+fun question(question: Question, category: Category) : ThymeleafContent {
+    return ThymeleafContent("fragments/question", mapOf(
+        Pair("question", question),
+        Pair("category", category))
+    )
 }
 
 fun winnerBoard() : ThymeleafContent {
@@ -38,8 +38,15 @@ fun judgeSkipControl(question: Question) : ThymeleafContent {
     return ThymeleafContent("fragments/control/judge-skip-control", mapOf(Pair("question", question)))
 }
 
-fun questionAnswer(question: Question) : ThymeleafContent {
-    return ThymeleafContent("fragments/question_answer", mapOf(Pair("question", question)))
+fun questionAnswer(question: Question, category: Category) : ThymeleafContent {
+    return ThymeleafContent("fragments/question_answer", mapOf(
+        Pair("question", question),
+        Pair("category", category)
+    ))
+}
+
+fun displayQuestion() : ThymeleafContent {
+    return ThymeleafContent("fragments/script/display_question", mapOf())
 }
 
 fun participants(room: Room) : ThymeleafContent {
