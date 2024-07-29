@@ -197,6 +197,26 @@ fun answerQuestion(room: Room, candidateGuesser: String, question: Question) {
     }
 }
 
+fun applause(room: Room) {
+    val roomSession = roomSession(room)
+
+    runBlocking {
+        launch {
+            roomSession.connections.forEach { it.outgoing.send(applause().frameText()) }
+        }
+    }
+}
+
+fun answerModal(room: Room, question: Question) {
+    val roomSession = roomSession(room)
+
+    runBlocking {
+        launch {
+            roomSession.connections.forEach { it.outgoing.send(answerModal(question).frameText()) }
+        }
+    }
+}
+
 fun renderToString(content: ThymeleafContent): String {
     val stringWriter = StringWriter()
 

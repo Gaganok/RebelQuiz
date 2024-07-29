@@ -1,0 +1,21 @@
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <h4 th:text="${'Answer: ' + question.answer}"></h4>
+    </div>
+
+    <script>
+
+        var modalElem = document.getElementById('modal');
+        var instance = M.Modal.init(modalElem, {
+            outDuration: 500,
+            dismissible: false,
+        });
+
+        instance.open()
+
+        setTimeout(() => {
+            instance.close()
+            document.getElementById("modal").classList.add("hidden")
+        }, 3000)
+    </script>
+</div>

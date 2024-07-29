@@ -187,6 +187,8 @@ fun Application.configureRouting() {
                 ?: throw IllegalStateException("Participant not found")
 
             nextRound(room)
+            applause(room)
+            answerModal(room, question)
 
             call.respond(HttpStatusCode.NoContent)
         }
@@ -218,9 +220,11 @@ fun Application.configureRouting() {
                 "Non-host participant cannot skip"
             }
 
-            findQuestion(room, call.questionId()).isAnswered = true
+            val question = findQuestion(room, call.questionId())
+                .apply { isAnswered = true }
 
             nextRound(room)
+            answerModal(room, question)
 
             call.respond(HttpStatusCode.NoContent)
         }

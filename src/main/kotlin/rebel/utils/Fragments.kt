@@ -14,6 +14,14 @@ fun question(question: Question, category: Category) : ThymeleafContent {
     )
 }
 
+fun answerModal(question: Question) : ThymeleafContent {
+    return ThymeleafContent("fragments/modal/answer_modal", mapOf(Pair("question", question)))
+}
+
+fun applause() : ThymeleafContent {
+    return ThymeleafContent("fragments/script/applause", mapOf())
+}
+
 fun winnerBoard() : ThymeleafContent {
     return ThymeleafContent("fragments/winner-board", mapOf())
 }

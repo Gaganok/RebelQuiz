@@ -34,22 +34,15 @@
     >   
       <script>
 
-        document.notifyQuestionReady = () => {
-          console.log("trigger request to notify back")
-          let element = document.getElementById('question_script')
-          console.log(element)
-          element.dispatchEvent(new Event('loadedTrigger'));
-          // document.getElementById('question_script').dispatchEvent(new Event('loadedTrigger'));
-        }
+        document.notifyQuestionReady = () => document.getElementById('question_script')?.dispatchEvent(new Event('loadedTrigger'));
+      
     
-        console.log("question script executed")
         document.questionLoaded = () => {
           document.isQuestionTransitionDone && document.notifyQuestionReady()
           document.isQuestionMediaLoaded = true;
         }
     
         setTimeout(() => {
-          console.log("timeout reached")
           if(document.isQuestionMediaLoaded) {
             document.notifyQuestionReady()
           } else {
