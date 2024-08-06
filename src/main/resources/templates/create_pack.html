@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://unpkg.com/htmx.org/dist/htmx.min.js"></script>   
+    <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/ws.js"></script>
+
+    <title>Rebel Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .collection-item {
+            color: #0d47a1 !important;
+        }
+
+        .collection-item:not(.active):hover {
+            background-color: #bbdefb !important;
+            font-size: 15px;
+            transition: font-size 0.1s ease;
+        }
+
+        .collection .collection-item.active {  
+            background-color: #90cdff !important;
+            font-size: 15px;
+            transition: font-size 0.1s ease;
+        }
+
+        .collection {
+            border-radius: 10px !important;
+        }
+
+        .btn-custom {
+            background-color: #0d47a1 !important;
+            color: #ffffff !important;
+            border: none;
+            padding-top: 1.5px !important;
+            font-size: 36px;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .wrapper {
+            display: flex;
+            gap: 35px;
+            padding: 30px;
+        }
+
+        .category_wrapper {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            gap: 20px;
+
+            padding-right: 35px;
+            border-right: 2px solid rgba(158, 158, 158, 0.4);
+            height: 600px;
+        }
+
+        .question_wrapper {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 4;
+            gap: 10px;
+        }
+
+        .category_button_wrapper {
+            display: flex;
+            text-align: center;
+            gap: 15px
+        }
+
+        .category_button_wrapper > span{
+            font-size: 36px;
+        }
+
+        .short {
+            max-width: 150px;
+        }
+
+        .input_custom:focus {
+            color: #424242 !important;
+            border-bottom: 2px solid #0d47a1 !important;
+            box-shadow: 0 1px 0 0 #bbdefb !important;
+        }
+
+        input:focus {
+            color: #424242 !important;
+            border-bottom: 2px solid #0d47a1 !important;
+            box-shadow: 0 1px 0 0 #bbdefb !important;
+        }
+
+        #category_text {
+            position: relative;
+        }
+
+        .show {
+            animation: fadeIn 1.9s forwards;
+        }
+
+        .hidden {
+            animation: fadeOut 0.4s forwards;
+        }
+
+        ul {
+            list-style-type: none;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                visibility: hidden;
+            }
+            to {
+                opacity: 1;
+                visibility: visible;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                visibility: visible;
+            }
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        .row {
+            margin-left: 0px !important;
+            margin-right: 0px !important;
+        }
+
+        .not_visible {
+            visibility: hidden;
+        }
+
+        .absolute {
+            position: absolute;
+        }   
+
+        #media_answer {
+            padding-top: 20px;
+        }
+
+        li:not(:first-child) span {
+            color: #0d47a1 !important;
+        }
+
+        #add_question {
+            align-self: flex-end;
+        }
+
+        .box__file {
+            padding-top: 20px !important;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="view">
+    
+        <h1 style="margin-left: 25px; color: #9e9e9e">Create your Pack</h1>
+        <form id="create-room-form" name="create-room-form"
+            hx-post="/room/create" 
+            hx-target="#view"
+            hx-vals='js:{selectedPack: getSelectedPack()}'
+            hx-trigger="click from:#create-room-button"
+            hx-swap="outerHTML"
+        >
+            <div class="wrapper">
+                <div class="category_wrapper">
+                    <div class="category_button_wrapper">
+                        <input id="category_input" class=" absolute input_custom not_visible short" placeholder="Category Name">
+                        <a id="add_category" class="btn-floating btn-large waves-effect waves-light btn-custom ">+</a>
+                        <span id="category_text">Category</span>
+                    </div>
+                    <div id="category_collection" class="collection"></div>
+                </div>
+                <div id="question_wrapper" class="question_wrapper">
+                    <a id="add_question" class="btn-floating btn-large waves-effect waves-light btn-custom s3 not_visible">+</a>
+                    <!-- <div id="category_1" class="absolute not_visible">
+                        <input class="input_custom" placeholder="Category Description"/>
+                        <div class="row question_contenct_wrapper">
+                            <input class="col s3 input_custom" placeholder="Question">
+                            <div class="col s3">
+                                <select id="question_type_selector">
+                                <option value="" disabled selected>Choose question type</option>
+                                <option value="1">Text</option>
+                                <option value="2">Image</option>
+                                <option value="3">Audio</option>
+                                <option value="4">Video</option>
+                                </select>
+                                <label>Materialize Select</label>
+                            </div>
+                            <input id="text_answer" class="col s3 not_visible input_custom absolute" placeholder="Answer">
+                            <input id="media_answer" class="box__file col s3 not_visible" type="file" name="files[]" id="file" data-multiple-caption="{count} files selected" multiple />
+                        </div>
+                    </div>
+                    <div id="category_1">
+                        <input class="input_custom" placeholder="Category Description"/>
+                        <div class="row question_contenct_wrapper">
+                            <input class="col s3 input_custom" placeholder="Question">
+                            <div class="col s3">
+                                <select id="question_type_selector">
+                                <option value="" disabled selected>Choose question type</option>
+                                <option value="1">Text</option>
+                                <option value="2">Image</option>
+                                <option value="3">Audio</option>
+                                <option value="4">Video</option>
+                                </select>
+                                <label>Materialize Select</label>
+                            </div>
+                            <input id="text_answer" class="col s3 not_visible input_custom absolute" placeholder="Answer">
+                            <input id="media_answer" class="box__file col s3 not_visible" type="file" name="files[]" id="file" data-multiple-caption="{count} files selected" multiple />
+                        </div>
+                    </div> -->
+                </div>
+            </div>
+        </form>
+        <script>
+
+            const categoryInputElem = document.getElementById("category_input");
+            const categoryTextElem = document.getElementById("category_text");
+            const categoryCollection = document.getElementById("category_collection")
+
+            let selectedCategory;
+
+            let questionIndex = 1;
+
+            let pack = []
+            
+            document.getElementById('add_category').addEventListener('click', (e) => {
+                const elem = e.target
+
+                if (elem.transformed) {
+                    elem.style.transform = 'translateX(0)';
+
+                    categoryInputElem.classList.remove('show');
+                    categoryInputElem.classList.add('hidden');
+
+                    categoryTextElem.classList.remove('hidden');
+                    categoryTextElem.classList.add('show');
+
+                    elem.transformed = false;
+                } else {
+                    elem.style.transform = 'translateX(175px)';
+
+                    categoryInputElem.classList.remove('hidden');
+                    categoryInputElem.classList.add('show');
+
+                    categoryTextElem.classList.remove('show');
+                    categoryTextElem.classList.add('hidden');
+
+                    elem.transformed = true;
+                }
+            });
+
+            document.getElementById('add_question').addEventListener('click', (e) => {
+                document.getElementById("category_question_" + selectedCategory.index).appendChild(questionElement(questionIndex++))
+                var elems = document.querySelectorAll('select');
+                var instances = M.FormSelect.init(elems, {});
+            });
+
+            categoryInputElem.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault()
+                    const categoryName = categoryInputElem.value.trim()
+                    const category = categoryElement(categoryInputElem.value.trim());
+                    categoryCollection.appendChild(category)
+                    categoryInputElem.value = ''
+
+                    pack.push({name: categoryName, questions: []})
+                    category.index = pack.length;
+
+                    const categoryQuestionDiv = document.createElement('div')
+                    categoryQuestionDiv.id = "category_question_" + category.index
+                    categoryQuestionDiv.classList.add('absolute', 'not_visible')
+
+                    const descriptionInput = document.createElement('input');
+                    descriptionInput.placeholder = "Description"
+                    descriptionInput.classList.add('input_custom')
+
+                    categoryQuestionDiv.appendChild(descriptionInput)
+
+                    document.getElementById("question_wrapper").appendChild(categoryQuestionDiv)
+                }
+            })
+
+            function categoryElement(categoryName) {
+                const category = document.createElement('a');
+                category.textContent = categoryName;
+                category.classList.add('collection-item'); 
+
+                const deleteBadge = document.createElement('span');
+                deleteBadge.textContent = '🗑️'
+                deleteBadge.classList.add('badge')
+
+                category.addEventListener('click', () => {
+
+                    if(selectedCategory) {
+                        selectedCategory.classList.toggle("active")
+                        var categoryQuestion = document.getElementById("category_question_" + selectedCategory.index)
+                        categoryQuestion.classList.toggle('absolute')
+                        categoryQuestion.classList.toggle('not_visible')
+                    } else {
+                        console.log("here")
+                        document.getElementById("add_question").classList.toggle('not_visible')
+                    }
+
+                    category.classList.toggle("active")
+                    selectedCategory = category
+
+                    var categoryQuestion = document.getElementById("category_question_" + selectedCategory.index)
+                    categoryQuestion.classList.toggle('absolute')
+                    categoryQuestion.classList.toggle('not_visible')
+                })
+
+                deleteBadge.addEventListener('click', () => categoryCollection.removeChild(category));
+
+                category.appendChild(deleteBadge)
+                return category;
+            }
+
+            function questionElement(index) {
+                const questionContentWrapper = document.createElement('div');
+                questionContentWrapper.classList.add('row', 'question_contenct_wrapper'); 
+
+                const questionInput = document.createElement('input');
+                questionInput.placeholder = "Question"
+                questionInput.classList.add('col', 's3', 'input_custom')
+
+                const valueInput = document.createElement('input');
+                valueInput.placeholder = "Value"
+                valueInput.type = 'number'
+                valueInput.step = 100
+                valueInput.min = 100
+                valueInput.max = 1000
+                valueInput.classList.add('col', 's3', 'input_custom')
+
+                const select = questionTypeSelectElement(index)
+
+                const typeSelect = document.createElement('div');
+                typeSelect.classList.add('col', 's3'); 
+                typeSelect.appendChild(select)
+
+                const textAnswer = document.createElement('input');
+                textAnswer.placeholder = "Answer"
+                textAnswer.classList.add('col', 's3', 'not_visible', 'input_custom', 'absolute')
+                textAnswer.id = "text_answer_" + index
+
+                const mediaAnswer = document.createElement('input');
+                mediaAnswer.type = 'file'
+                mediaAnswer.classList.add('box__file', 'col', 's3', 'not_visible')
+                mediaAnswer.id = "media_answer_" + index
+
+                select.addEventListener("change", (e) => {
+                    const selectedValue = event.target.value;
+
+                    if(selectedValue == 1) {
+                        document.getElementById("text_answer_" + index).classList.remove("not_visible")
+                        document.getElementById("media_answer_" + index).classList.add("not_visible")
+                    } else {
+                        document.getElementById("text_answer_" + index).classList.add("not_visible")
+                        document.getElementById("media_answer_" + index).classList.remove("not_visible")
+                    }
+                })
+
+                questionContentWrapper.appendChild(questionInput)
+                questionContentWrapper.appendChild(valueInput)
+                questionContentWrapper.appendChild(typeSelect)
+                questionContentWrapper.appendChild(textAnswer)
+                questionContentWrapper.appendChild(mediaAnswer)
+
+                return questionContentWrapper;
+            }
+
+            function questionTypeSelectElement(index) {
+                const select = document.createElement('select');
+                select.id = "question_type_selector_" + index
+                
+                select.innerHTML = `
+                            <option value="" disabled selected>Question Type</option>
+                            <option value="1">Text</option>
+                            <option value="2">Image</option>
+                            <option value="3">Audio</option>
+                            <option value="4">Video</option>
+                            <label>Materialize Select</label>
+                `
+
+                M.FormSelect.init([select], {});
+
+                return select
+            }
+    
+        </script>
+    </div>
+</body>
+</html>

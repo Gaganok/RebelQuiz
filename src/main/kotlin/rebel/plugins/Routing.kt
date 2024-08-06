@@ -67,6 +67,10 @@ fun Application.configureRouting() {
             call.respond(createRoom())
         }
 
+        get("/pack/create") {
+            call.respond(createPack())
+        }
+
         post("/room/create") {
             val params = call.receiveParameters()
 

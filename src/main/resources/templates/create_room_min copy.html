@@ -1,0 +1,46 @@
+<div id="view">
+
+    <style scoped>
+            .select-wrapper{
+                padding-bottom: 15px;
+            }
+            
+            select{
+                display: block;
+            }
+    </style>
+
+    <h1 style="margin-left: 25px; color: #9e9e9e">Create your room</h1>
+    <form id="create-room-form" name="create-room-form"
+        hx-post="/room/create" 
+        hx-target="#view"
+        hx-vals='js:{selectedPack: getSelectedPack()}'
+        hx-trigger="click from:#create-room-button"
+        hx-swap="outerHTML"
+    >
+        <div class="input-wrapper">
+            <div class="input-field col s6">
+                <input id="roomName" name="roomName" type="text" class="validate">
+                <label class="center-align" for="roomName">Room Name</label>
+            </div>
+            <div class="select-wrapper">
+                <label>Quiz</label>
+                <select id="pack-select" class="quiz-select">
+                  <option disabled selected>Choose quiz</option>
+                  <option 
+                    th:each="packName : ${packNames}" 
+                    th:value="${packName}"
+                    th:text="${packName}"></option>
+                </select>
+            </div>
+            <a id="create-room-button" class="waves-effect waves-light btn btn-custom">Create</a>
+        </div>
+    </form>
+    <script>
+
+        function getSelectedPack() {
+            return document.getElementById('pack-select').value;
+        }
+
+    </script>
+</div>

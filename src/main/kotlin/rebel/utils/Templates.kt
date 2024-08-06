@@ -29,6 +29,10 @@ fun createRoom() : ThymeleafContent {
     return ThymeleafContent("create_room_min", mapOf(Pair("packNames", packNames())))
 }
 
+fun createPack() : ThymeleafContent {
+    return ThymeleafContent("create_pack", mapOf())
+}
+
 fun playground() : ThymeleafContent {
     return ThymeleafContent("playground_min", mapOf(Pair("rooms", rooms())))
 }
