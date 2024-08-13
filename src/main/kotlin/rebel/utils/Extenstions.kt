@@ -2,12 +2,16 @@ package rebel.utils
 
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.http.content.*
 import io.ktor.server.request.*
+import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import io.ktor.server.thymeleaf.*
 import io.ktor.websocket.*
+import kotlinx.css.Position
 import rebel.plugins.QuizSession
 import rebel.service.*
+import java.io.File
 
 fun ApplicationCall.roomByParam(): Room? {
     return this.parameters["room"]
@@ -51,4 +55,8 @@ fun ApplicationCall.questionId(): String {
 
 fun ThymeleafContent.frameText(): Frame.Text {
     return Frame.Text(renderToString(this))
+}
+
+fun Route.addStaticFilesRoute(path: String, folderPath: File) {
+    staticFiles("/", folderPath)
 }

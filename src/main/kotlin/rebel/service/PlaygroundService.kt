@@ -14,8 +14,8 @@ enum class QuestionType {
 
 @Serializable
 data class Question(
-    val question: String,
-    var answer: String,
+    var question: String,
+    val answer: String,
     val type: QuestionType,
     val value: Int,
     @Transient val id: UUID = UUID.randomUUID(),

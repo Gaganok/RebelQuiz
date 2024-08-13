@@ -28,6 +28,8 @@ fun Application.configureRouting() {
             }
         }
 
+        staticFiles("/media", File("media"))
+
         get("/") {
             val template = call.sessions.get<QuizSession>()
                 ?.let { welcomePlayground() }
@@ -80,7 +82,7 @@ fun Application.configureRouting() {
             var pack: Pack? = null;
 
             val tempPackName = UUID.randomUUID().toString();
-            val packMediaDir = File("src/main/resources/static/$tempPackName")
+            val packMediaDir = File("media/$tempPackName")
             packMediaDir.mkdirs();
 
             val fileNamePathMap = mutableMapOf<String, String>();
@@ -98,11 +100,11 @@ fun Application.configureRouting() {
                         val fileBytes = part.streamProvider().readBytes()
                         val filePath = "$tempPackName/$fileName"
 
-                        File("src/main/resources/static/$filePath").apply {
+                        File("media/$filePath").apply {
                             writeBytes(fileBytes)
                         }
 
-                        fileNamePathMap.put(fileName, "resources/$filePath")
+                        fileNamePathMap.put(fileName, "media/$filePath")
                     }
                     else -> part.dispose()
                 }
@@ -112,14 +114,12 @@ fun Application.configureRouting() {
                 packMediaDir.delete()
             }
 
-            requireNotNull(pack) {
-                "Pack is required!"
-            }
+            requireNotNull(pack) { "Pack is required!" }
 
             pack!!.questionnaire
                 .flatMap { it.qa }
                 .filter { it.type != QuestionType.TEXT }
-                .forEach{ it.apply { answer = fileNamePathMap[answer]
+                .forEach{ it.apply { question = fileNamePathMap[question]
                     ?: throw IllegalStateException("Pack media file is not processed") }}
 
             addPack(pack!!)

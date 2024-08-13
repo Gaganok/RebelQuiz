@@ -156,15 +156,17 @@
         .box__file {
             padding-top: 20px !important;
         }
+
+        .question_content_wrapper .badge {
+            padding-top: 20px;
+        }
     </style>
 
     <h1 style="margin-left: 25px; color: #9e9e9e">Create Pack</h1>
     <form id="create-pack-form" name="create-pack-form"
-        hx-post="/pack/create" 
+        hx-get="/" 
         hx-target="#view"
-        hx-vals='js:{pack: getPack()}'
-        hx-encoding="multipart/form-data"
-        hx-trigger="click from:#send_"
+        hx-trigger="doneHere"
         hx-swap="outerHTML"
     >
         <div class="wrapper">
@@ -209,15 +211,13 @@
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.text())
-            .then(result => {
-                // document.getElementById('result').innerHTML = result;
+            .then(response => {
+                const joinButton = document.getElementById('create-pack-form');
+                const joinEvent = new Event('doneHere');
+                joinButton.dispatchEvent(joinEvent);
             })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-
-            console.log(pack)
+            .then(result => {})
+            .catch(error => {console.log(error)});
         })
 
         function getPack() {
@@ -268,8 +268,7 @@
             categoryCollection.appendChild(category)
             categoryInputElem.value = ''
 
-            const categoryEntry = {name: categoryName, qa: []}
-            pack.questionnaire.push(categoryEntry)
+            pack.questionnaire.push(category.entry)
             category.index = pack.questionnaire.length;
 
             const categoryQuestionDiv = document.createElement('div')
@@ -280,7 +279,7 @@
             descriptionInput.placeholder = "Category Description"
             descriptionInput.classList.add('input_custom')
 
-            descriptionInput.addEventListener('input', (e) => categoryEntry.description = event.target.value)
+            descriptionInput.addEventListener('input', (e) => category.entry.description = event.target.value)
 
             categoryQuestionDiv.appendChild(descriptionInput)
 
@@ -317,7 +316,12 @@
                 categoryQuestion.classList.toggle('not_visible')
             })
 
-            deleteBadge.addEventListener('click', () => categoryCollection.removeChild(category));
+            category.entry = {name: categoryName, qa: []}
+
+            deleteBadge.addEventListener('click', () => {
+                categoryCollection.removeChild(category)
+                pack.questionnaire = removeItem(pack.questionnaire, category.entry)
+            });
 
             category.appendChild(deleteBadge)
             return category;
@@ -332,16 +336,17 @@
 
         function questionElement(index, categoryIndex) {
             const question = {}
-            pack.questionnaire[categoryIndex - 1].qa.push(question)
+            const category = pack.questionnaire[categoryIndex - 1]
+            category.qa.push(question)
 
             const questionContentWrapper = document.createElement('div');
             questionContentWrapper.classList.add('row', 'question_content_wrapper'); 
 
-            const questionInput = document.createElement('input');
-            questionInput.placeholder = "Question"
-            questionInput.classList.add('col', 's3', 'input_custom')
+            const answerInput = document.createElement('input');
+            answerInput.placeholder = "Answer"
+            answerInput.classList.add('col', 's2', 'input_custom')
 
-            questionInput.addEventListener('input', (e) => question.question = event.target.value)
+            answerInput.addEventListener('input', (e) => question.answer = event.target.value)
 
             const valueInput = document.createElement('input');
             valueInput.placeholder = "Value"
@@ -349,7 +354,7 @@
             valueInput.step = 100
             valueInput.min = 100
             valueInput.max = 1000
-            valueInput.classList.add('col', 's3', 'input_custom')
+            valueInput.classList.add('col', 's2', 'input_custom')
 
             valueInput.addEventListener('input', (e) => question.value = event.target.value)
 
@@ -358,24 +363,24 @@
             select.addEventListener('change', (e) => question.type = event.target.value)
 
             const typeSelect = document.createElement('div');
-            typeSelect.classList.add('col', 's3'); 
+            typeSelect.classList.add('col', 's2'); 
             typeSelect.appendChild(select)
 
-            const textAnswer = document.createElement('input');
-            textAnswer.placeholder = "Answer"
-            textAnswer.classList.add('col', 's3', 'not_visible', 'input_custom', 'absolute')
-            textAnswer.id = "text_answer_" + index
+            const textQuestion = document.createElement('input');
+            textQuestion.placeholder = "Question"
+            textQuestion.classList.add('col', 's2', 'not_visible', 'input_custom', 'absolute')
+            textQuestion.id = "text_answer_" + index
 
-            textAnswer.addEventListener('input', (e) => question.answer = event.target.value)
+            textQuestion.addEventListener('input', (e) => question.question = event.target.value)
 
-            const mediaAnswer = document.createElement('input');
-            mediaAnswer.type = 'file'
-            mediaAnswer.classList.add('box__file', 'col', 's3', 'not_visible')
-            mediaAnswer.id = "media_answer_" + index
+            const mediaQuestion = document.createElement('input');
+            mediaQuestion.type = 'file'
+            mediaQuestion.classList.add('box__file', 'col', 's3', 'not_visible')
+            mediaQuestion.id = "media_answer_" + index
 
-            mediaAnswer.addEventListener('change', (e) => {
+            mediaQuestion.addEventListener('change', (e) => {
                 const file = event.target.files[0];
-                question.answer = file.name
+                question.question = file.name
                 files.push(file)
             })
 
@@ -391,11 +396,20 @@
                 }
             })
 
-            questionContentWrapper.appendChild(questionInput)
+            const deleteBadge = document.createElement('span');
+            deleteBadge.textContent = '🗑️'
+            deleteBadge.classList.add('badge', 'col', 's1')
+            deleteBadge.addEventListener('click', () => {
+                document.getElementById("category_question_" + categoryIndex).removeChild(questionContentWrapper);
+                category.qa = removeItem(category.qa, question)
+            })
+
+            questionContentWrapper.appendChild(deleteBadge)
             questionContentWrapper.appendChild(valueInput)
+            questionContentWrapper.appendChild(answerInput)
             questionContentWrapper.appendChild(typeSelect)
-            questionContentWrapper.appendChild(textAnswer)
-            questionContentWrapper.appendChild(mediaAnswer)
+            questionContentWrapper.appendChild(textQuestion)
+            questionContentWrapper.appendChild(mediaQuestion)
 
             return questionContentWrapper;
         }
@@ -416,6 +430,14 @@
             M.FormSelect.init([select], {});
 
             return select
+        }
+
+        function removeItem(arr, value) {
+            var index = arr.indexOf(value);
+            if (index > -1) {
+                arr.splice(index, 1);
+            }
+            return arr;
         }
 
     </script>
