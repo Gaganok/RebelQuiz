@@ -1,6 +1,8 @@
 package rebel.service
 
 import io.ktor.websocket.*
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import java.util.*
 
 enum class QuestionType {
@@ -10,16 +12,19 @@ enum class QuestionType {
     TEXT;
 }
 
+@Serializable
 data class Question(
     val question: String,
-    val answer: String,
+    var answer: String,
     val type: QuestionType,
     val value: Int,
-    val id: UUID = UUID.randomUUID(),
+    @Transient val id: UUID = UUID.randomUUID(),
     var isAnswered: Boolean = false)
 
+@Serializable
 data class Category(val name: String, val qa: List<Question>, val description: String? = null)
 
+@Serializable
 data class Pack(val name: String, val questionnaire: List<Category>) {
     fun hasNoQuestionLeft(): Boolean {
         return !questionnaire.flatMap { it.qa }.any { !it.isAnswered }

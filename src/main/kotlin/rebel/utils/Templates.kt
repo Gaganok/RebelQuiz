@@ -30,7 +30,7 @@ fun createRoom() : ThymeleafContent {
 }
 
 fun createPack() : ThymeleafContent {
-    return ThymeleafContent("create_pack", mapOf())
+    return ThymeleafContent("create_pack_min", mapOf())
 }
 
 fun playground() : ThymeleafContent {

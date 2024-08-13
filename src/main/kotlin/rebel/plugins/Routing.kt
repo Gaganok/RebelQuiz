@@ -1,14 +1,18 @@
 package rebel.plugins
 
 import io.ktor.http.*
+import io.ktor.http.content.*
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
+import kotlinx.serialization.json.Json
 import rebel.service.*
 import rebel.utils.*
+import java.io.File
+import java.util.UUID
 
 fun Application.configureRouting() {
 
@@ -69,6 +73,58 @@ fun Application.configureRouting() {
 
         get("/pack/create") {
             call.respond(createPack())
+        }
+
+        post("/pack/create") {
+            val multipart = call.receiveMultipart()
+            var pack: Pack? = null;
+
+            val tempPackName = UUID.randomUUID().toString();
+            val packMediaDir = File("src/main/resources/static/$tempPackName")
+            packMediaDir.mkdirs();
+
+            val fileNamePathMap = mutableMapOf<String, String>();
+
+            multipart.forEachPart { part ->
+                when (part) {
+                    is PartData.FormItem -> {
+                        if (part.name == "pack") {
+                            pack = Json.decodeFromString(Pack.serializer(), part.value)
+                            println()
+                        }
+                    }
+                    is PartData.FileItem -> {
+                        val fileName = part.originalFileName!!
+                        val fileBytes = part.streamProvider().readBytes()
+                        val filePath = "$tempPackName/$fileName"
+
+                        File("src/main/resources/static/$filePath").apply {
+                            writeBytes(fileBytes)
+                        }
+
+                        fileNamePathMap.put(fileName, "resources/$filePath")
+                    }
+                    else -> part.dispose()
+                }
+            }
+
+            if(fileNamePathMap.isEmpty()) {
+                packMediaDir.delete()
+            }
+
+            requireNotNull(pack) {
+                "Pack is required!"
+            }
+
+            pack!!.questionnaire
+                .flatMap { it.qa }
+                .filter { it.type != QuestionType.TEXT }
+                .forEach{ it.apply { answer = fileNamePathMap[answer]
+                    ?: throw IllegalStateException("Pack media file is not processed") }}
+
+            addPack(pack!!)
+
+            call.respond(HttpStatusCode.NoContent)
         }
 
         post("/room/create") {

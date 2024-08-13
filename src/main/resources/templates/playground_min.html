@@ -3,7 +3,7 @@
         .playground-wrapper {
             display: flex;
             flex-direction: column;
-            max-width: 50vh;
+            max-width: 60vh;
             margin: 20vh auto;
             text-align: center;
         }
@@ -66,6 +66,11 @@
                 hx-target="#view"
                 hx-swap="outerHTML"
             >Create Room</a>
+            <a class="waves-effect waves-light btn btn-custom" 
+                hx-get="/pack/create" 
+                hx-target="#view"
+                hx-swap="outerHTML"
+            >Create Pack</a>
              <a id="join" class="hidden" 
                 hx-post="/room/join" 
                 hx-target="#view"

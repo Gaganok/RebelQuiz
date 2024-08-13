@@ -1,11 +1,14 @@
 package rebel.service
 
-val quizPacks: Map<String, Pack> = loadQuizPacks();
+val quizPacks: MutableMap<String, Pack> = loadQuizPacks();
 
-fun loadQuizPacks() : Map<String, Pack> {
-    return mutableListOf(
-        rebelPack()
-    ).associateBy { it.name };
+fun loadQuizPacks() : MutableMap<String, Pack> {
+    val rebelPack = rebelPack()
+    return mutableMapOf(Pair(rebelPack.name, rebelPack()));
+}
+
+fun addPack(pack: Pack) {
+    quizPacks[pack.name] = pack
 }
 
 fun packs() : Collection<Pack> {
