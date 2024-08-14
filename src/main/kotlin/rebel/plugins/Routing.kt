@@ -8,6 +8,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import rebel.service.*
 import rebel.utils.*
@@ -28,7 +29,7 @@ fun Application.configureRouting() {
             }
         }
 
-        staticFiles("/media", File("media"))
+        staticFiles("/pack", File("pack"))
 
         get("/") {
             val template = call.sessions.get<QuizSession>()
@@ -81,11 +82,11 @@ fun Application.configureRouting() {
             val multipart = call.receiveMultipart()
             var pack: Pack? = null;
 
-            val tempPackName = UUID.randomUUID().toString();
-            val packMediaDir = File("media/$tempPackName")
+            val packDir = "pack/${UUID.randomUUID()}";
+            val packMediaDir = File("$packDir/media")
             packMediaDir.mkdirs();
 
-            val fileNamePathMap = mutableMapOf<String, String>();
+            val fileNameToPathMap = mutableMapOf<String, String>();
 
             multipart.forEachPart { part ->
                 when (part) {
@@ -98,19 +99,16 @@ fun Application.configureRouting() {
                     is PartData.FileItem -> {
                         val fileName = part.originalFileName!!
                         val fileBytes = part.streamProvider().readBytes()
-                        val filePath = "$tempPackName/$fileName"
+                        val filePath = "$packMediaDir/$fileName"
 
-                        File("media/$filePath").apply {
-                            writeBytes(fileBytes)
-                        }
-
-                        fileNamePathMap.put(fileName, "media/$filePath")
+                        File(filePath).apply { writeBytes(fileBytes) }
+                        fileNameToPathMap.put(fileName, filePath)
                     }
                     else -> part.dispose()
                 }
             }
 
-            if(fileNamePathMap.isEmpty()) {
+            if(fileNameToPathMap.isEmpty()) {
                 packMediaDir.delete()
             }
 
@@ -119,11 +117,21 @@ fun Application.configureRouting() {
             pack!!.questionnaire
                 .flatMap { it.qa }
                 .filter { it.type != QuestionType.TEXT }
-                .forEach{ it.apply { question = fileNamePathMap[question]
-                    ?: throw IllegalStateException("Pack media file is not processed") }}
+                .forEach{ it.apply {
+                    question = fileNameToPathMap[question] ?: throw IllegalStateException("Pack media file is not processed") }
+                }
 
             addPack(pack!!)
 
+            File("$packDir/${pack!!.name}.json").apply {
+                writeText(Json.encodeToString(pack))
+            }
+
+            call.respond(HttpStatusCode.NoContent)
+        }
+
+        get("/pack/reload") {
+            reloadQuizPacks()
             call.respond(HttpStatusCode.NoContent)
         }
 

@@ -1,10 +1,27 @@
 package rebel.service
 
-val quizPacks: MutableMap<String, Pack> = loadQuizPacks();
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import java.io.File
 
-fun loadQuizPacks() : MutableMap<String, Pack> {
+val quizPacks: MutableMap<String, Pack> = mutableMapOf();
+
+fun reloadQuizPacks() {
+    quizPacks.clear()
+
     val rebelPack = rebelPack()
-    return mutableMapOf(Pair(rebelPack.name, rebelPack()));
+    quizPacks.put(rebelPack.name, rebelPack)
+
+    File("pack")
+        .apply { mkdirs() }
+        .listFiles()!!
+        .asSequence()
+        .filter { it.isDirectory }
+        .flatMap { it.listFiles()?.toList()!! }
+        .filter { it.isFile && it.extension == "json" }
+        .map { it.readText(Charsets.UTF_8) }
+        .map { Json.decodeFromString(Pack.serializer(), it) }
+        .forEach { quizPacks.put(it.name, it) }
 }
 
 fun addPack(pack: Pack) {
