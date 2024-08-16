@@ -145,22 +145,21 @@ fun pickQuestion(room: Room, question: Question) {
 
     runBlocking {
         launch {
-            room.host.connection?.outgoing?.let {
-                it.send(questionAnswer(question, category).frameText())
-                it.send(judgeSkipControl(question).frameText())
-            }
+            room.host.connection?.outgoing?.send(questionAnswer(question, category).frameText())
             room.participants.forEach {
                 it.connection?.outgoing?.send(question(question, category).frameText())
-                it.connection?.outgoing?.send(answerControl(question).frameText())
             }
         }
     }
 
+    roomSession.activeQuestion = question;
     updateParticipants(room)
 }
 
 fun loaded(room: Room) {
     val roomSession = roomSession(room)
+    val question = roomSession.activeQuestion
+        ?: throw IllegalStateException("No active question available")
 
     require(roomSession.state == RoomState.ANSWERING)
 
@@ -170,9 +169,14 @@ fun loaded(room: Room) {
             .takeIf { room.participants.size + 1 == it.loadedCount }
             ?.apply { loadedCount = 0 }
             .run {
-                room.host.connection?.outgoing?.send(displayQuestion().frameText())
+                room.host.connection?.outgoing?.let {
+                    it.send(displayQuestion().frameText())
+                    it.send(judgeSkipControl(question).frameText())
+                }
+
                 room.participants.forEach {
                     it.connection?.outgoing?.send(displayQuestion().frameText())
+                    it.connection?.outgoing?.send(answerControl(question).frameText())
                 }
             }
     }
@@ -258,5 +262,6 @@ enum class RoomState{
 data class RoomSession(
     val connections: MutableList<WebSocketSession> = mutableListOf(),
     var state: RoomState = RoomState.WAITING_PARTICIPANTS,
-    var loadedCount: Int = 0
+    var loadedCount: Int = 0,
+    var activeQuestion: Question? = null
 )

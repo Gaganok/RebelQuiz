@@ -17,10 +17,12 @@
     });
 
     function answerButtonHandler() {
-      if(pressedAnswer) return;
+      setTimeout(() => {
+        if(pressedAnswer) return;
 
-      pressedAnswer = true;
-      htmx.trigger("#answer-button", "answer-event")
+        pressedAnswer = true;
+        htmx.trigger("#answer-button", "answer-event")
+      }, document.getElementsByClassName("playable").length > 0 ? 5000 : 0)
     }
   </script>
 </div>
